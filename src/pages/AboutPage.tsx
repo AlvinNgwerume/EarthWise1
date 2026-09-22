@@ -1,16 +1,13 @@
 import React from 'react';
 import { PageId } from '../types';
-import { TEAM_MEMBERS } from '../data/earthwiseData';
 import { 
   ShieldCheck, 
   Leaf, 
+  Clock, 
   Award, 
+  FileCheck, 
   CheckCircle2, 
-  Users, 
-  Sparkles, 
-  Phone, 
-  BookOpen,
-  Check
+  Phone
 } from 'lucide-react';
 
 interface AboutPageProps {
@@ -23,155 +20,107 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookingM
     <div className="space-y-20 pb-16">
       
       {/* Hero Header */}
-      <section className="bg-gradient-to-b from-[#E8EFEA]/50 to-[#FBFBF9] pt-12 pb-16 border-b border-zinc-200/60">
+      <section className="bg-gradient-to-b from-[#F4F7F5] to-[#FFFFFF] pt-12 pb-16 border-b border-[#E2E8F0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
-          <div className="inline-flex items-center space-x-2 bg-[#E8EFEA] text-[#1E3A2B] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#C5DACD]">
-            <Award className="w-3.5 h-3.5 text-[#2E5E40]" />
-            <span>30+ Years Legacy</span>
+          <div className="inline-flex items-center space-x-2 bg-[#F4F7F5] text-[#1B4332] px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-[#D8ECE0]">
+            <Award className="w-3.5 h-3.5 text-[#52B788]" />
+            <span>Cape Town Pest Specialists</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif-italic font-bold text-[#162019]">
-            Precision Protection <span className="text-[#1E3A2B]">Since 1994</span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif-italic font-bold text-[#1B4332]">
+            About <span className="text-[#52B788]">Earthwise</span>
           </h1>
 
-          <p className="text-zinc-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-            Over three decades of protecting Cape Town homes, heritage estates, and commercial spaces with biological science and uncompromised care.
+          <p className="text-[#4A5568] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            Protecting your property while respecting the environment with safe, effective, and affordable pest management.
           </p>
         </div>
       </section>
 
-      {/* The Earthwise Philosophy Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        <div className="text-center max-w-2xl mx-auto space-y-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#1E3A2B] bg-[#E8EFEA] px-3.5 py-1.5 rounded-full border border-[#C5DACD]">
-            Our Core Pillars
-          </span>
-          <h2 className="text-3xl font-serif-italic font-bold text-[#162019]">
-            The Earthwise Philosophy
+      {/* Why Choose Earthwise? Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="max-w-3xl mx-auto text-center space-y-4">
+          <div>
+            <span className="inline-flex items-center text-[11px] font-bold uppercase tracking-widest text-[#1B4332] bg-[#F4F7F5] px-3 py-1 rounded-full border border-[#D8ECE0] shadow-2xs mb-2">
+              Our Commitment
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-serif-italic font-bold text-[#1B4332]">
+            Why Choose Earthwise?
           </h2>
+          <p className="text-[#4A5568] text-base sm:text-lg leading-relaxed">
+            At Earthwise Pest Management, we believe in protecting your property while respecting the environment. Based in Cape Town, we are a locally owned and operated company dedicated to providing safe, effective, and affordable pest solutions.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* 5 Core Pillars Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
             {
-              title: 'Eco-Conscious Science',
-              subtitle: 'Bio-rational formulations',
-              desc: 'We replace harsh synthetic neurotoxins with plant-derived micro-encapsulated compounds that specifically target pest nervous systems while remaining 100% harmless to mammals and endemic fynbos flora.',
-              icon: Leaf
-            },
-            {
-              title: 'Quietly Competent',
-              subtitle: 'Discreet professional execution',
-              desc: 'We operate discreetly with unmarked vehicles upon request, arriving precisely on schedule with industrial-grade safety gear and clear step-by-step communication.',
+              title: 'Licensed & Insured',
+              desc: 'Fully certified pest control operators.',
               icon: ShieldCheck
             },
             {
-              title: 'Legacy Since 1994',
-              subtitle: 'Deep Cape Town expertise',
-              desc: 'Founded in 1994 by senior entomologist Julian Thorne, our team understands the unique structural challenges of Cape Town Victorian heritage homes, coastal weather, and micro-climates.',
+              title: 'Eco-Friendly Products',
+              desc: 'Safe for children, pets, and the planet.',
+              icon: Leaf
+            },
+            {
+              title: 'Fast Response',
+              desc: 'Same-day service available for urgent infestations.',
+              icon: Clock
+            },
+            {
+              title: 'Guaranteed Results',
+              desc: 'We stand by our work with a satisfaction guarantee.',
               icon: Award
+            },
+            {
+              title: 'On-Site Inspections & Quotes',
+              desc: 'Transparent pricing, no hidden fees.',
+              icon: FileCheck
             }
-          ].map((pillar, i) => (
+          ].map((item, i) => (
             <div
               key={i}
-              className="bg-white rounded-3xl p-8 border border-zinc-200/80 shadow-sm space-y-4 hover:shadow-md transition-shadow"
+              className={`glass-card rounded-3xl p-8 shadow-sm space-y-4 hover:shadow-xl hover:border-[#1B4332]/50 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5 ${
+                i === 4 ? 'md:col-span-2 lg:col-span-1' : ''
+              }`}
             >
-              <div className="w-12 h-12 rounded-2xl bg-[#E8EFEA] text-[#1E3A2B] flex items-center justify-center">
-                <pillar.icon className="w-6 h-6 text-[#1E3A2B]" />
-              </div>
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#1E3A2B]">
-                  {pillar.subtitle}
-                </span>
-                <h3 className="text-2xl font-serif-italic font-bold text-[#162019]">
-                  {pillar.title}
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#F4F7F5]/80 text-[#1B4332] flex items-center justify-center border border-[#D8ECE0]">
+                  <item.icon className="w-6 h-6 text-[#1B4332]" />
+                </div>
+                <h3 className="text-xl font-serif-italic font-bold text-[#1B4332]">
+                  {item.title}
                 </h3>
+                <p className="text-[#4A5568] text-sm leading-relaxed">
+                  — {item.desc}
+                </p>
               </div>
-              <p className="text-zinc-600 text-xs sm:text-sm leading-relaxed">
-                {pillar.desc}
-              </p>
+              <div className="pt-2">
+                <div className="w-full h-1 bg-[#F4F7F5] rounded-full overflow-hidden">
+                  <div className="w-1/3 h-full bg-[#52B788]" />
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Meet the Guardians Section */}
-      <section className="bg-[#F4F6F4] py-16 border-y border-zinc-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#1E3A2B] bg-white px-3.5 py-1.5 rounded-full border border-[#C5DACD]">
-              Leadership & Specialists
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-serif-italic font-bold text-[#162019]">
-              Meet the Guardians
-            </h2>
-            <p className="text-zinc-600 text-sm">
-              Our registered pest control officers, chemical safety auditors, and structural exclusion engineers.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TEAM_MEMBERS.map((member) => (
-              <div
-                key={member.id}
-                className="bg-white rounded-2xl overflow-hidden border border-zinc-200/80 shadow-sm hover:shadow-lg transition-all space-y-4 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="h-64 overflow-hidden relative bg-zinc-100">
-                    <img
-                      src={member.imageUrl}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <span className="absolute bottom-3 left-3 bg-[#162019]/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded">
-                      {member.experienceYears} Years Exp.
-                    </span>
-                  </div>
-
-                  <div className="p-5 space-y-2">
-                    <h3 className="text-xl font-serif-italic font-bold text-[#162019]">
-                      {member.name}
-                    </h3>
-                    <p className="text-xs font-semibold text-[#1E3A2B]">
-                      {member.role}
-                    </p>
-                    <p className="text-zinc-600 text-xs leading-relaxed line-clamp-3">
-                      {member.bio}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-5 pt-0 border-t border-zinc-100">
-                  <div className="space-y-1 pt-2">
-                    {member.credentials.map((cred, idx) => (
-                      <div key={idx} className="flex items-center space-x-1.5 text-[10px] text-zinc-600">
-                        <Check className="w-3 h-3 text-[#2E5E40]" />
-                        <span>{cred}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
       {/* Certifications & Compliance grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="bg-[#162019] text-white rounded-3xl p-8 sm:p-12 border border-[#2E4737] space-y-8">
+        <div className="bg-[#1B4332]/95 backdrop-blur-xl text-white rounded-3xl p-8 sm:p-12 border border-white/10 shadow-2xl space-y-8">
           <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#86C29B]">
-              Regulatory Trust
-            </span>
-            <h2 className="text-3xl font-serif-italic font-bold text-white">
-              Official Certifications & Audits
+            <div className="inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-[#F4F7F5] bg-[#0D1F17] border border-[#2D6A4F] px-4 py-1.5 rounded-full shadow-inner">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#74C69D]" />
+              <span className="text-[#F4F7F5] tracking-wider">Regulatory Trust</span>
+            </div>
+            <h2 className="text-3xl font-serif-italic font-bold text-white pt-2">
+              Official Certifications & Safety Standards
             </h2>
-            <p className="text-zinc-300 text-sm">
+            <p className="text-[#D8ECE0] text-sm">
               We operate under full legal compliance with South African pesticide legislation and environmental safety guidelines.
             </p>
           </div>
@@ -183,10 +132,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookingM
               { title: 'HACCP Audit Ready', desc: 'Compliant with strict international food hygiene & safety standards.' },
               { title: 'SABS Approved', desc: 'Equipped with South African Bureau of Standards verified protection methods.' }
             ].map((cert, idx) => (
-              <div key={idx} className="bg-[#1F2F24] p-5 rounded-2xl border border-[#2B4233] space-y-2">
-                <CheckCircle2 className="w-5 h-5 text-[#86C29B]" />
+              <div key={idx} className="bg-[#132A20]/90 backdrop-blur-xs p-5 rounded-2xl border border-[#2D6A4F] space-y-2 hover:border-[#52B788]/60 transition-colors">
+                <CheckCircle2 className="w-5 h-5 text-[#52B788]" />
                 <h3 className="font-bold text-base text-white">{cert.title}</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">{cert.desc}</p>
+                <p className="text-[#D8ECE0]/80 text-xs leading-relaxed">{cert.desc}</p>
               </div>
             ))}
           </div>
@@ -195,20 +144,29 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookingM
 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#E8EFEA] rounded-3xl p-8 sm:p-12 text-center text-[#162019] space-y-6 border border-[#C5DACD]">
-          <h2 className="text-3xl sm:text-4xl font-serif-italic font-bold">
+        <div className="bg-[#F4F7F5] rounded-3xl p-8 sm:p-12 text-center text-[#1B4332] space-y-6 border border-[#D8ECE0]">
+          <h2 className="text-3xl sm:text-4xl font-serif-italic font-bold text-[#1B4332]">
             Experience the Earthwise Way
           </h2>
-          <p className="text-zinc-600 text-sm max-w-xl mx-auto">
-            Book your eco-friendly property assessment with senior Cape Town entomologist Julian Thorne and team.
+          <p className="text-[#4A5568] text-sm max-w-xl mx-auto leading-relaxed">
+            Get in touch with our Cape Town team for advice, on-site property assessments, and guaranteed eco-friendly pest management.
           </p>
-          <button
-            onClick={onOpenBookingModal}
-            className="px-8 py-3.5 rounded-xl bg-[#1E3A2B] hover:bg-[#2A4D3B] text-white font-bold text-sm transition-all shadow-md inline-flex items-center space-x-2"
-          >
-            <ShieldCheck className="w-4 h-4 text-[#86C29B]" />
-            <span>Schedule Property Inspection</span>
-          </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <button
+              onClick={() => onOpenBookingModal()}
+              className="px-6 py-3 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm shadow-sm transition-all flex items-center justify-center space-x-2"
+            >
+              <ShieldCheck className="w-4 h-4 text-[#1B4332]" />
+              <span>Book Property Inspection</span>
+            </button>
+            <a
+              href="tel:+27622118851"
+              className="px-6 py-3 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm shadow-sm transition-all flex items-center justify-center space-x-2"
+            >
+              <Phone className="w-4 h-4 text-[#1B4332]" />
+              <span>Call +27 62 211 8851</span>
+            </a>
+          </div>
         </div>
       </section>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Sparkles, ArrowRight, CheckCircle2, AlertTriangle, ChevronRight } from 'lucide-react';
+import { Shield, Sparkles, ArrowRight, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { SERVICES_DATA } from '../data/earthwiseData';
 
 interface PestCalculatorProps {
@@ -7,79 +7,87 @@ interface PestCalculatorProps {
 }
 
 export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceForBooking }) => {
-  const [selectedPest, setSelectedPest] = useState<'rodents' | 'birds' | 'ants-roaches' | 'termites' | 'ceiling'>('birds');
+  const [selectedPest, setSelectedPest] = useState<string>('cockroaches');
   const [propertySize, setPropertySize] = useState<'small' | 'medium' | 'large' | 'commercial'>('medium');
   const [hasPetOrChildren, setHasPetOrChildren] = useState(true);
 
-  const pestConfigs = {
-    birds: {
-      title: 'Roosting Pigeons & Seagulls',
-      serviceId: 'bird-proofing',
-      badge: 'High-Tension Netting & Spikes',
-      estimateRange: 'R 2,400 - R 6,500',
-      timeframe: 'Same-day structural fitment',
-      strategy: 'Marine-grade 316 stainless steel spike tracks & UV-coated polyethylene perimeter netting.',
-      safetyNote: '100% Humane, zero harm to avian species, preserving architectural facade views.'
-    },
-    rodents: {
-      title: 'Roof Rats & House Mice',
-      serviceId: 'rodent-exclusion',
-      badge: 'Exclusion & Structural Sealing',
-      estimateRange: 'R 1,800 - R 4,200',
-      timeframe: '2 Visits (Initial + Proofing)',
-      strategy: 'Architectural sealing of weep holes, copper mesh installation & non-toxic smart traps.',
-      safetyNote: 'Bio-rational non-repellent matrix safe around house pets & food prep areas.'
-    },
-    'ants-roaches': {
-      title: 'German Cockroaches & Ants',
-      serviceId: 'eco-treatments',
+  const pestConfigs: Record<string, any> = {
+    cockroaches: {
+      title: 'Cockroaches',
+      serviceId: 'cockroaches',
       badge: 'Botanical Micro-Gel Matrix',
-      estimateRange: 'R 1,200 - R 2,800',
-      timeframe: '30-minute application window',
-      strategy: 'Low-toxicity micro-encapsulated bait gel applied directly into nesting crevices.',
-      safetyNote: 'Odourless, zero fumes. No house evacuation required.'
+      timeframe: '30-45 min application',
+      strategy: 'Low-toxicity micro-encapsulated bait gel and targeted pheromone barriers applied directly into nesting crevices.',
+      safetyNote: 'Odourless, zero harsh fumes. Safe for children, pets, and food preparation areas.'
     },
-    termites: {
-      title: 'Subterranean Termites & Woodborer',
-      serviceId: 'termite-woodborer',
-      badge: '5-Year Barrier & Clearance Certs',
-      estimateRange: 'R 3,500 - R 9,000',
-      timeframe: 'Comprehensive Sub-slab Injection',
-      strategy: 'Perimeter liquid soil termiticide barrier injection & SAPCA Beetle Clearance inspection.',
-      safetyNote: 'Non-repellent transfer technology that destroys subterranean queen colonies.'
+    ants: {
+      title: 'Ants',
+      serviceId: 'ants',
+      badge: 'Colony Eradication System',
+      timeframe: 'Same-day targeted treatment',
+      strategy: 'Non-repellent transfer technology and natural botanical perimeter barriers to eliminate entire nests.',
+      safetyNote: 'Safe for children, pets, and the planet.'
     },
-    ceiling: {
-      title: 'Contaminated Ceiling & Guano',
-      serviceId: 'ceiling-hygiene',
-      badge: 'HEPA Vacuum & Virucidal Misting',
-      estimateRange: 'R 2,900 - R 7,800',
-      timeframe: 'Full 1-day space restoration',
-      strategy: 'Industrial HEPA guano vacuuming, virucidal fogging & mineral batt thermal insulation renewal.',
-      safetyNote: 'Hospital-grade sanitisation eliminating respiratory mites and air-borne pathogens.'
+    'rats-mice': {
+      title: 'Rats & Mice',
+      serviceId: 'rats-mice',
+      badge: 'Exclusion & Smart Control',
+      timeframe: 'Inspection + Exclusion fitment',
+      strategy: 'Architectural sealing of roof and wall entry points with tamper-proof child/pet-safe stations.',
+      safetyNote: 'Tamper-resistant bait containment safe around domestic pets.'
+    },
+    'mole-treatment': {
+      title: 'Mole Treatment',
+      serviceId: 'mole-treatment',
+      badge: 'Specialized Lawn Protection',
+      timeframe: 'Sub-surface ground application',
+      strategy: 'Non-invasive subterranean remediation protecting lawns, putting greens, and gardens.',
+      safetyNote: 'Zero lawn damage, non-hazardous to soil biology and domestic animals.'
+    },
+    'bedbugs-fleas': {
+      title: 'Bedbugs & Fleas',
+      serviceId: 'bedbugs-fleas',
+      badge: 'Thermal & Botanical Sanitation',
+      timeframe: 'Comprehensive multi-stage treatment',
+      strategy: 'Targeted botanical sprays and heat extraction treating mattresses, carpets, upholstery, and floor skirting.',
+      safetyNote: 'Hypoallergenic, rapid re-entry, non-staining botanical formulations.'
+    },
+    'bird-proofing': {
+      title: 'Bird Proofing',
+      serviceId: 'bird-proofing',
+      badge: '316 Marine Stainless & Netting',
+      timeframe: 'Custom architectural fitment',
+      strategy: 'UV-stabilised netting, solar panel guards, and marine-grade stainless steel spike barriers.',
+      safetyNote: '100% Humane physical exclusion with 10-year tension guarantee.'
+    },
+    'bat-removal': {
+      title: 'Bat Removal',
+      serviceId: 'bat-removal',
+      badge: 'Humane One-Way Exclusion',
+      timeframe: 'Specialized seasonal exclusion',
+      strategy: 'Compliant one-way exclusion valves and roof cavity sealing followed by bio-sanitisation.',
+      safetyNote: 'Strictly humane and environmentally compliant under wildlife guidelines.'
     }
   };
 
-  const currentConfig = pestConfigs[selectedPest];
-  const targetService = SERVICES_DATA.find(s => s.id === currentConfig.serviceId);
+  const currentConfig = pestConfigs[selectedPest] || pestConfigs['cockroaches'];
 
   return (
-    <div className="bg-[#162019] text-[#E0E7E2] rounded-3xl p-6 sm:p-10 border border-[#263D2E] shadow-xl relative overflow-hidden">
+    <div className="bg-[#1B4332]/95 backdrop-blur-xl text-[#F4F7F5] rounded-3xl p-6 sm:p-10 border border-white/15 shadow-2xl relative overflow-hidden">
       
       {/* Glow highlight */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#2A4D3B]/20 rounded-full blur-3xl -z-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#52B788]/15 rounded-full blur-3xl -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#2D6A4F]/20 rounded-full blur-2xl -z-10 pointer-events-none" />
 
       {/* Header */}
       <div className="max-w-3xl space-y-3 mb-8">
-        <div className="inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-[#86C29B] bg-[#22382A] px-3.5 py-1.5 rounded-full border border-[#2E543D]">
-          <Sparkles className="w-3.5 h-3.5 text-[#86C29B]" />
-          <span>Interactive Pest & Protocol Assistant</span>
+        <div className="inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-[#F4F7F5] bg-[#0D1F17] border border-[#2D6A4F] px-4 py-1.5 rounded-full shadow-inner">
+          <Sparkles className="w-3.5 h-3.5 text-[#74C69D]" />
+          <span className="text-[#F4F7F5] tracking-wider">Interactive Pest & Solution Assistant</span>
         </div>
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif-italic text-white">
-          Identify Your Pest & Calculate Recommended Solution
+          Select your property's specific challenge and book your inspection
         </h2>
-        <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
-          Select your property's specific challenge to generate a bio-rational treatment blueprint and estimated Cape Town service scope.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -89,32 +97,34 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
           
           {/* Select Pest Type */}
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-300 block">
+            <label className="text-xs font-bold uppercase tracking-wider text-[#D8ECE0] block">
               1. Select Primary Pest Issue
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {[
-                { id: 'birds', label: 'Roosting Birds & Seagulls', icon: '🕊️' },
-                { id: 'rodents', label: 'Rats & Mice Infestation', icon: '🐀' },
-                { id: 'ants-roaches', label: 'Cockroaches & Ants', icon: '🪳' },
-                { id: 'termites', label: 'Termites & Woodborer', icon: '🪵' },
-                { id: 'ceiling', label: 'Roof Cavity & Guano Cleanup', icon: '🛖' }
+                { id: 'cockroaches', label: 'Cockroaches', icon: '🪳' },
+                { id: 'ants', label: 'Ants', icon: '🐜' },
+                { id: 'rats-mice', label: 'Rats & Mice', icon: '🐀' },
+                { id: 'mole-treatment', label: 'Mole Treatment', icon: '🐾' },
+                { id: 'bedbugs-fleas', label: 'Bedbugs & Fleas', icon: '🛏️' },
+                { id: 'bird-proofing', label: 'Bird Proofing', icon: '🕊️' },
+                { id: 'bat-removal', label: 'Bat Removal', icon: '🦇' }
               ].map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setSelectedPest(item.id as any)}
-                  className={`p-3.5 rounded-2xl border text-left transition-all duration-200 flex items-center justify-between ${
+                  onClick={() => setSelectedPest(item.id)}
+                  className={`p-3 rounded-2xl border text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
                     selectedPest === item.id
-                      ? 'bg-[#2A4D3B] text-white border-[#86C29B] shadow-md ring-1 ring-[#86C29B]/30'
-                      : 'bg-[#1F2F24] text-zinc-300 border-[#2B4233] hover:border-zinc-500'
+                      ? 'bg-[#2D6A4F] text-white border-[#52B788] shadow-md ring-2 ring-[#52B788]/40 scale-[1.02]'
+                      : 'bg-[#132A20]/80 backdrop-blur-xs text-[#D8ECE0] border-[#2D6A4F]/80 hover:border-[#52B788]/70 hover:bg-[#132A20]'
                   }`}
                 >
                   <div className="flex items-center space-x-2.5">
-                    <span className="text-xl">{item.icon}</span>
+                    <span className="text-lg">{item.icon}</span>
                     <span className="text-xs font-semibold">{item.label}</span>
                   </div>
                   {selectedPest === item.id && (
-                    <CheckCircle2 className="w-4 h-4 text-[#86C29B] shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#52B788] shrink-0" />
                   )}
                 </button>
               ))}
@@ -123,12 +133,12 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
 
           {/* Select Property Scale */}
           <div className="space-y-3">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-300 block">
+            <label className="text-xs font-bold uppercase tracking-wider text-[#D8ECE0] block">
               2. Property Footprint Scale
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-medium">
               {[
-                { id: 'small', label: 'Apartment / Flat' },
+                { id: 'small', label: 'Apartment' },
                 { id: 'medium', label: 'Standard House' },
                 { id: 'large', label: 'Large Estate' },
                 { id: 'commercial', label: 'Commercial' }
@@ -136,10 +146,10 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
                 <button
                   key={size.id}
                   onClick={() => setPropertySize(size.id as any)}
-                  className={`py-2.5 px-3 rounded-xl border text-center transition-all ${
+                  className={`py-2.5 px-3 rounded-xl border text-center transition-all duration-200 cursor-pointer ${
                     propertySize === size.id
-                      ? 'bg-[#2E5E40] text-white border-[#86C29B]'
-                      : 'bg-[#1F2F24] text-zinc-400 border-[#2B4233] hover:text-white'
+                      ? 'bg-[#2D6A4F] text-white border-[#52B788] font-bold shadow-xs scale-102'
+                      : 'bg-[#132A20]/80 text-[#D8ECE0]/80 border-[#2D6A4F]/80 hover:text-white hover:border-[#52B788]/50'
                   }`}
                 >
                   {size.label}
@@ -149,19 +159,19 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
           </div>
 
           {/* Eco-Safety Check */}
-          <div className="p-4 rounded-2xl bg-[#1F2F24] border border-[#2B4233] flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-[#132A20]/80 backdrop-blur-xs border border-[#2D6A4F] flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Shield className="w-5 h-5 text-[#86C29B]" />
+              <Shield className="w-5 h-5 text-[#52B788]" />
               <div>
                 <p className="text-xs font-semibold text-white">Eco & Pet Safety Priority</p>
-                <p className="text-[11px] text-zinc-400">Strict Act 36 zero-VOC formulation protocol</p>
+                <p className="text-[11px] text-[#D8ECE0]/80">Safe for children, pets, and the planet</p>
               </div>
             </div>
             <button
               onClick={() => setHasPetOrChildren(!hasPetOrChildren)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                 hasPetOrChildren 
-                  ? 'bg-[#86C29B] text-[#162019]' 
+                  ? 'bg-[#52B788] text-[#1B4332] shadow-xs' 
                   : 'bg-zinc-700 text-zinc-300'
               }`}
             >
@@ -172,11 +182,11 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
         </div>
 
         {/* Step 3 Estimated Protocol Blueprint Card */}
-        <div className="lg:col-span-6 bg-[#1F2F24] rounded-2xl p-6 border border-[#2E4737] space-y-5">
+        <div className="lg:col-span-6 bg-[#132A20]/90 backdrop-blur-md rounded-3xl p-6 sm:p-7 border border-white/10 space-y-5 shadow-xl">
           
-          <div className="flex items-center justify-between border-b border-[#2E4737] pb-4">
+          <div className="flex items-center justify-between border-b border-[#2D6A4F] pb-4">
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-[#86C29B] font-bold">
+              <span className="text-[11px] uppercase tracking-wider text-[#52B788] font-bold">
                 {currentConfig.badge}
               </span>
               <h3 className="text-xl font-bold text-white font-serif-italic">
@@ -184,35 +194,35 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
               </h3>
             </div>
             <div className="text-right">
-              <span className="text-xs text-zinc-400 block">Estimated Scope</span>
-              <span className="text-lg font-extrabold text-[#86C29B]">{currentConfig.estimateRange}</span>
+              <span className="text-[10px] uppercase tracking-wider text-[#D8ECE0]/80 block">Assessment</span>
+              <span className="text-xs font-bold text-[#52B788] glass-pill px-2 py-0.5 rounded-full">On-Site Inspection</span>
             </div>
           </div>
 
           {/* Protocol Strategy */}
           <div className="space-y-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-300">
-              Recommended Protocol Blueprint
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#D8ECE0]">
+              Recommended Solution
             </h4>
-            <p className="text-xs text-zinc-300 leading-relaxed bg-[#162019] p-3 rounded-xl border border-[#2B4233]">
+            <p className="text-xs text-[#D8ECE0] leading-relaxed bg-[#1B4332]/90 p-4 rounded-2xl border border-[#2D6A4F]">
               {currentConfig.strategy}
             </p>
           </div>
 
           {/* Safety & Timeframe */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="bg-[#162019] p-3 rounded-xl border border-[#2B4233] space-y-1">
-              <span className="text-zinc-400 block text-[10px] uppercase">Service Timeframe</span>
+            <div className="bg-[#1B4332]/90 p-3.5 rounded-2xl border border-[#2D6A4F] space-y-1">
+              <span className="text-[#D8ECE0]/70 block text-[10px] uppercase">Service Timeframe</span>
               <span className="font-semibold text-white">{currentConfig.timeframe}</span>
             </div>
-            <div className="bg-[#162019] p-3 rounded-xl border border-[#2B4233] space-y-1">
-              <span className="text-zinc-400 block text-[10px] uppercase">Safety Guarantee</span>
-              <span className="font-semibold text-[#86C29B]">100% Eco-Safe</span>
+            <div className="bg-[#1B4332]/90 p-3.5 rounded-2xl border border-[#2D6A4F] space-y-1">
+              <span className="text-[#D8ECE0]/70 block text-[10px] uppercase">Safety Guarantee</span>
+              <span className="font-semibold text-[#52B788]">100% Eco-Safe</span>
             </div>
           </div>
 
-          <div className="flex items-start space-x-2 text-[11px] text-zinc-400">
-            <AlertTriangle className="w-4 h-4 text-[#D4A359] shrink-0 mt-0.5" />
+          <div className="flex items-start space-x-2 text-[11px] text-[#D8ECE0]/80">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <span>{currentConfig.safetyNote}</span>
           </div>
 
@@ -220,10 +230,10 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
           <div className="pt-2">
             <button
               onClick={() => onSelectServiceForBooking(currentConfig.serviceId)}
-              className="w-full py-3.5 px-6 rounded-xl bg-[#86C29B] hover:bg-[#9AD4AF] text-[#162019] font-bold text-sm transition-all duration-200 shadow-md flex items-center justify-center space-x-2 group"
+              className="w-full py-3.5 px-6 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 group cursor-pointer"
             >
-              <span>Book This Recommended Protocol</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>Book Property Inspection</span>
+              <ArrowRight className="w-4 h-4 text-[#1B4332] group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
 

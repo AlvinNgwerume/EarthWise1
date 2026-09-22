@@ -1,4 +1,4 @@
-export type PageId = 'home' | 'services' | 'gallery' | 'about' | 'contact';
+export type PageId = 'home' | 'services' | 'about' | 'contact' | 'privacy' | 'terms' | 'act36';
 
 export interface NavItem {
   id: PageId;

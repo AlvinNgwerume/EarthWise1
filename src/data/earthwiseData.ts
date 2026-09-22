@@ -14,147 +14,127 @@ import elenaImg from '../assets/images/elena_rossi_1785463273469.jpg';
 
 export const SERVICES_DATA: ServiceItem[] = [
   {
-    id: 'eco-treatments',
-    title: 'Precision Eco-Treatments',
-    category: 'Targeted Pest Control',
-    tagline: 'Botanical micro-encapsulation & low-toxicity targeted applications.',
-    description: 'Our proprietary plant-based and low-toxicity micro-formulations target insect nervous systems without lingering toxic VOC fumes or chemical residues. Certified Act 36/1947 safe for homes with children, pets, and indoor aquariums.',
+    id: 'cockroaches',
+    title: 'Cockroaches',
+    category: 'Pest Control',
+    tagline: 'Targeted gel baiting and complete nest eradication.',
+    description: 'Targeted eco-friendly bait gel application and precision micro-sprays that eradicate German and American cockroach nests at the source without toxic fumes or kitchen disruptions.',
     iconName: 'ShieldCheck',
     imageUrl: ecoImg,
     features: [
-      'Zero harsh chemical fumes or evacuation requirements',
-      'Targeted bait gel matrix for German cockroach nest eradication',
-      'Odourless, bio-rational barrier treatments for perimeter defense',
-      'Child & pet safe within 30 minutes of application'
+      'Nest-targeted bio-rational gel baiting',
+      'Zero chemical fumes or harsh odours',
+      'Child & pet safe formulation within 30 mins',
+      'Long-lasting preventive barrier defense'
     ],
-    recommendedFor: 'Residential homes, apartments, nurseries, and sensitive environments.',
-    targetPests: ['Ants', 'Cockroaches', 'Fishmoths', 'Fleas', 'Spiders']
+    recommendedFor: 'Residential homes, apartments, restaurants, kitchens, commercial food prep.',
+    targetPests: ['German Cockroaches', 'American Cockroaches', 'Oriental Cockroaches']
   },
   {
-    id: 'bird-proofing',
-    title: 'Humane Bird Proofing & Exclusion',
-    category: 'Avian Management',
-    tagline: 'High-tension stone netting, marine-grade spikes & optical gels.',
-    description: 'Protect Cape Town heritage facades, solar panels, and commercial ledges from roosting pigeons, starlings, and seagulls. Engineered using UV-stabilised 316 stainless steel fittings that preserve architectural aesthetics while guaranteeing 100% roost prevention.',
-    iconName: 'Bird',
-    imageUrl: birdImg,
+    id: 'ants',
+    title: 'Ants',
+    category: 'Pest Control',
+    tagline: 'Colony eradication and long-term perimeter shielding.',
+    description: 'Specialized non-repellent transfer formulas carried directly to the queen by foraging worker ants, eliminating entire subterranean nests and garden colonies permanently.',
+    iconName: 'ShieldCheck',
+    imageUrl: ecoImg,
     features: [
-      'Discreet high-density polyethylene (HDPE) netting in stone & black',
-      'Solar panel bird barrier mesh to protect wiring & efficiency',
-      'Marine-grade 316 stainless steel anti-roosting spike tracks',
-      'Humane non-harmful optical magnetic gel deterrent discs'
+      'Queen colony transfer technology',
+      'Safe for lawns, garden beds, and indoor floors',
+      'Perimeter foundation barrier treatment',
+      'Effective against sugar ants, black ants & fire ants'
     ],
-    recommendedFor: 'Solar panel installations, commercial rooftops, heritage buildings, coastal balconies.',
-    targetPests: ['Pigeons', 'Starlings', 'Seagulls', 'Sparrows']
+    recommendedFor: 'Residential properties, garden perimeters, paved areas, kitchens.',
+    targetPests: ['Sugar Ants', 'Black House Ants', 'Pugnacious Ants', 'Argentine Ants']
   },
   {
-    id: 'ceiling-hygiene',
-    title: 'Ceiling Space Hygiene & Sanitisation',
-    category: 'Roof Cavity Restoration',
-    tagline: 'HEPA vacuum extraction, virucidal fogging & insulation renewal.',
-    description: 'Rodents and birds nesting in Cape Town roof spaces deposit toxic guano, allergens, and mites into your ceiling. Our specialized team performs complete HEPA extraction, misting with eco-friendly virucidal foggers, and reinstalling high-performance thermal insulation.',
-    iconName: 'Sparkles',
+    id: 'rats-mice',
+    title: 'Rats & Mice',
+    category: 'Rodent Control',
+    tagline: 'Exclusion, structural sealing & humane rodent management.',
+    description: 'Comprehensive rodent control combining tamper-resistant bait stations, entry point proofing with heavy-duty mesh, and roof cavity sanitisation to prevent re-entry.',
+    iconName: 'ShieldAlert',
     imageUrl: ceilingImg,
     features: [
-      'Industrial HEPA-filter vacuuming of droppings & nesting debris',
-      'Hospital-grade eco-friendly virucidal & bactericidal fogging',
-      'Removal & environmentally compliant disposal of ruined insulation',
-      'Thermal & acoustic mineral insulation replacement with fire rating'
+      'Tamper-proof lockable exterior & interior bait stations',
+      'Architectural entry sealing (weep holes, eaves, pipe gaps)',
+      'Safe placement away from children, pets, and non-target wildlife',
+      'Roof space inspection and anti-pheromone sanitisation'
     ],
-    recommendedFor: 'Properties with previous rodent/bird infestation, foul roof odours, or old insulation.',
-    targetPests: ['Roof Rats', 'Mice', 'Bird Mites', 'Pigeon Guano']
+    recommendedFor: 'Homes, ceiling spaces, restaurants, food stores, coastal properties.',
+    targetPests: ['Roof Rats', 'Norway Rats', 'House Mice', 'Field Mice']
   },
   {
-    id: 'termite-woodborer',
-    title: 'Termite & Woodborer Barrier Systems',
-    category: 'Timber Protection',
-    tagline: 'Subterranean liquid soil barriers & clearance certificates.',
-    description: 'Subterranean termites and West Indian drywood borers can silently compromise structural timber and floors. We install deep perimeter liquid soil barriers and conduct timber injections, complete with official SAPCA Timber Inspection Clearance Certificates for property transfers.',
+    id: 'mole-treatment',
+    title: 'Mole Treatment',
+    category: 'Garden & Turf Care',
+    tagline: 'Subterranean runway management & lawn protection.',
+    description: 'Eco-conscious mole treatment and repellent systems designed to protect manicured Cape Town lawns, turf, and flowerbeds from destructive burrowing without toxic poisons.',
     iconName: 'Trees',
     imageUrl: termiteImg,
     features: [
-      'Termiticide soil perimeter barrier around foundation footings',
-      'Deep timber pressure injection & protective coat application',
-      'Subterranean bait station monitoring grid',
-      'Official SAPCA Beetle & Woodborer Clearance Certificates'
+      'Targeted subterranean runway & mound treatment',
+      'Protects grass roots, paving, and garden beds',
+      'Humane eco-friendly deterrent technology',
+      'Safe for pets, earthworms, and beneficial soil organisms'
     ],
-    recommendedFor: 'Home sellers, buyers, historic timber properties, sub-floor wooden structures.',
-    targetPests: ['Subterranean Termites', 'Woodborer Beetles', 'Furniture Beetles']
+    recommendedFor: 'Residential lawns, golf courses, garden estates, agricultural properties.',
+    targetPests: ['Golden Moles', 'Cape Dune Molerats', 'Subterranean Burrowers']
   },
   {
-    id: 'commercial-protocol',
-    title: 'Commercial & HACCP Pest Management',
-    category: 'Business & Hospitality',
-    tagline: 'Audit-ready compliance logging, digital trend reports & zero downtime.',
-    description: 'Designed specifically for Cape Town restaurants, boutique hotels, wineries, and food processing plants. We maintain strict HACCP, ISO 22000, and Food Safety audit readiness with tamper-resistant monitoring stations and transparent digital inspection logs.',
-    iconName: 'Building2',
-    imageUrl: commercialImg,
+    id: 'bedbugs-fleas',
+    title: 'Bedbugs & Fleas',
+    category: 'Biting Insect Eradication',
+    tagline: 'Multi-stage lifecycle elimination & soothing relief.',
+    description: 'Targeted insect growth regulators (IGR) and micro-encapsulated treatments that eliminate all lifecycle stages from eggs and larvae to biting adults in mattresses and carpets.',
+    iconName: 'Sparkles',
+    imageUrl: ecoImg,
     features: [
-      'Audit-ready electronic inspection logs & site mapping',
-      'Tamper-resistant lockable rodent stations & UV insect attractors',
-      'After-hours service scheduling for zero business disruption',
-      'Quarterly trend analysis & structural proofing recommendations'
+      'Kills eggs, larvae, and adult biting pests',
+      'Deep mattress, upholstery, skirting board & carpet treatment',
+      'Rapid re-entry with pet-safe bio-rational products',
+      'Immediate relief from persistent bites and skin irritation'
     ],
-    recommendedFor: 'Restaurants, hotels, food factories, office parks, wine estates.',
-    targetPests: ['Cockroaches', 'Rodents', 'Store Product Pests', 'Flies']
+    recommendedFor: 'Bedrooms, guest houses, rental units, pet-friendly households.',
+    targetPests: ['Bedbugs', 'Cat Fleas', 'Dog Fleas', 'Carpet Mites']
   },
   {
-    id: 'rodent-exclusion',
-    title: 'Rodent Exclusion & Proofing',
-    category: 'Structural Shielding',
-    tagline: 'Architectural entry sealing, mesh barriers & smart trapping.',
-    description: 'Eliminating rats and mice requires blocking their access permanently. Our structural proofing team seals weep holes, pipe penetrations, roof joins, and door gaps with stainless copper mesh and expandable mortar compounds.',
-    iconName: 'ShieldAlert',
+    id: 'bird-proofing',
+    title: 'Bird Proofing',
+    category: 'Avian Management',
+    tagline: 'Humane netting, stainless spikes & solar panel mesh guards.',
+    description: 'Discreet stone and black HDPE netting, 316 marine-grade stainless spikes, and non-drill solar panel clips that prevent roosting pigeons and starlings from damaging roofs.',
+    iconName: 'Bird',
     imageUrl: birdImg,
     features: [
-      'Full architectural inspection & entry point mapping',
-      'Heavy-duty stainless steel mesh & brush strip installation',
-      'Humane multi-catch electronic smart traps',
-      'Deodorising anti-pheromone sanitisation treatment'
+      'Discreet stone & black tensioned HDPE netting',
+      'Solar panel wire clip mesh to protect wiring',
+      'Marine-grade 316 stainless anti-roosting spikes',
+      '100% humane physical exclusion — zero harm to birds'
     ],
-    recommendedFor: 'Coastal properties, restaurants, roof-adjacent structures, older homes.',
-    targetPests: ['Roof Rats', 'Norway Rats', 'House Mice']
+    recommendedFor: 'Balconies, solar panels, commercial rooftops, heritage buildings.',
+    targetPests: ['Pigeons', 'Starlings', 'Seagulls', 'Sparrows']
+  },
+  {
+    id: 'bat-removal',
+    title: 'Bat Removal',
+    category: 'Wildlife Exclusion',
+    tagline: 'Humane one-way exclusion valves & roof sanitisation.',
+    description: 'Humane bat exclusion using custom one-way release funnels that allow bats to safely exit roof cavities without re-entering, followed by full guano cleanup and ceiling sanitisation.',
+    iconName: 'Building2',
+    imageUrl: ceilingImg,
+    features: [
+      'Humane one-way exclusion valves (no bats harmed)',
+      'Complete roof entry sealing and mesh installation',
+      'Bio-hazard guano removal and enzyme sanitisation',
+      'Conducted in strict compliance with South African conservation laws'
+    ],
+    recommendedFor: 'Roof spaces, ceiling cavities, historic chimneys, timber roofs.',
+    targetPests: ['Cape Serotine Bats', 'Free-Tailed Bats', 'Fruit Bats']
   }
 ];
 
-export const TEAM_MEMBERS: TeamMember[] = [
-  {
-    id: 'julian-thorne',
-    name: 'Julian Thorne',
-    role: 'Founder & Chief Entomologist',
-    bio: 'With over 30 years in South African biological pest control, Julian founded Earthwise in 1994 to pioneer eco-friendly micro-encapsulation techniques in Cape Town.',
-    imageUrl: julianImg,
-    credentials: ['M.Sc. Entomology (UCT)', 'SAPCA Master Certifier', 'Act 36 Registered PCO'],
-    experienceYears: 32
-  },
-  {
-    id: 'sarah-chen',
-    name: 'Sarah Chen',
-    role: 'Head of Eco-Formulation & Compliance',
-    bio: 'Sarah leads our chemical safety audits and bio-rational formulation testing, ensuring every compound used is safe for endemic Cape fynbos flora and domestic pets.',
-    imageUrl: sarahImg,
-    credentials: ['B.Sc. Environmental Science', 'HACCP Lead Auditor', 'Toxicology Specialist'],
-    experienceYears: 14
-  },
-  {
-    id: 'marcus-vane',
-    name: 'Marcus Vane',
-    role: 'Field Operations & Avian Specialist',
-    bio: 'Marcus manages our technical field teams across Cape Town, specializing in complex commercial bird proofing installations on high-rise and heritage buildings.',
-    imageUrl: marcusImg,
-    credentials: ['IRATA Level 3 Rope Technician', 'Advanced Structural Exclusion Specialist'],
-    experienceYears: 18
-  },
-  {
-    id: 'elena-rossi',
-    name: 'Elena Rossi',
-    role: 'Client Services & Hygiene Lead',
-    bio: 'Elena oversees our roof space hygiene projects and client care, ensuring seamless scheduling, transparent reports, and post-service follow-up inspections.',
-    imageUrl: elenaImg,
-    credentials: ['Indoor Air Quality Professional', 'Customer Success Director'],
-    experienceYears: 11
-  }
-];
+export const TEAM_MEMBERS: TeamMember[] = [];
 
 export const GALLERY_ITEMS: GalleryItem[] = [
   {
@@ -308,7 +288,7 @@ export const FAQ_ITEMS: FAQItem[] = [
     id: 'faq-5',
     category: 'Warranties & Results',
     question: 'What kind of guarantee or warranty do you provide on your services?',
-    answer: 'We stand firmly behind our craftsmanship. Standard eco-treatments carry a 3-month to 6-month free re-service warranty. Subterranean termite liquid barriers are guaranteed for 5 years, and commercial high-tension bird netting installations include a 10-year structural warranty.'
+    answer: 'We stand firmly behind our craftsmanship. Standard eco-treatments carry a 3-month to 6-month complimentary re-service warranty. Subterranean termite liquid barriers are guaranteed for 5 years, and commercial high-tension bird netting installations include a 10-year structural warranty.'
   },
   {
     id: 'faq-6',

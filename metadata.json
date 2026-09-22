@@ -1,6 +1,6 @@
 {
   "name": "Earthwise Pest Management",
-  "description": "Precision, eco-friendly pest control and management services for residential and commercial properties in Cape Town.",
+  "description": "Precision eco-friendly pest control in Cape Town. Sub-3-minute dispatch response, SAPCA & Act 36/1947 certified technicians, and family-safe, non-toxic treatments.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

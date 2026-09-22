@@ -1,122 +1,100 @@
 import React, { useState } from 'react';
 import { SUBURB_COVERAGE } from '../data/earthwiseData';
-import { MapPin, Search, Clock, CheckCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { MapPin, Clock, ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface SuburbCheckerProps {
-  onOpenBookingModal: () => void;
+  onOpenBookingModal: (serviceId?: string, initialData?: { suburb?: string; notes?: string }) => void;
 }
 
 export const SuburbChecker: React.FC<SuburbCheckerProps> = ({ onOpenBookingModal }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedZone, setSelectedZone] = useState<string>('All');
+  const [selectedSuburb, setSelectedSuburb] = useState<string>('City Bowl & CBD');
 
-  const filteredSuburbs = SUBURB_COVERAGE.filter((sub) => {
-    const matchesSearch = sub.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          sub.zone.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesZone = selectedZone === 'All' || sub.zone === selectedZone;
-    return matchesSearch && matchesZone;
-  });
-
-  const zones = ['All', 'City Bowl', 'Atlantic Seaboard', 'Southern Suburbs', 'Northern Suburbs', 'Helderberg'];
+  const current = SUBURB_COVERAGE.find((s) => s.name === selectedSuburb) || SUBURB_COVERAGE[0];
 
   return (
-    <div className="bg-[#E8EFEA]/80 border border-[#C5DACD] rounded-3xl p-6 sm:p-10 space-y-8">
+    <div className="glass-card rounded-3xl p-6 sm:p-10 space-y-8 relative overflow-hidden">
       
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-2 max-w-2xl">
-          <div className="inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-[#1E3A2B] bg-white px-3.5 py-1.5 rounded-full border border-[#C5DACD]">
-            <MapPin className="w-3.5 h-3.5 text-[#2E5E40]" />
-            <span>Cape Town Coverage Grid</span>
+          <div>
+            <span className="inline-flex items-center space-x-1.5 bg-[#F4F7F5] text-[#1B4332] px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border border-[#D8ECE0] shadow-2xs mb-2">
+              <MapPin className="w-3.5 h-3.5 text-[#52B788]" />
+              <span>Service Radius & Regional Fleet</span>
+            </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif-italic font-bold text-[#162019]">
-            Instant Dispatch & Suburb Service Checker
+          <h2 className="text-2xl sm:text-3xl font-serif-italic font-bold text-[#1B4332]">
+            Greater Cape Town Coverage & Dispatch Times
           </h2>
-          <p className="text-zinc-600 text-sm">
-            We operate active technician teams across all major Cape Town zones with guaranteed emergency response times.
+          <p className="text-[#4A5568] text-sm">
+            Select your suburb zone to view dedicated mobile unit response times and localized pest risk profiles.
           </p>
         </div>
-
-        {/* Search Input */}
-        <div className="w-full md:w-72 relative">
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3.5" />
-          <input
-            type="text"
-            placeholder="Search your suburb..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-zinc-300 focus:border-[#1E3A2B] focus:ring-2 focus:ring-[#1E3A2B]/10 outline-none text-sm transition-all"
-          />
-        </div>
       </div>
 
-      {/* Zone Filters */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
-        {zones.map((z) => (
-          <button
-            key={z}
-            onClick={() => setSelectedZone(z)}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-              selectedZone === z
-                ? 'bg-[#1E3A2B] text-white shadow-sm'
-                : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
-            }`}
-          >
-            {z}
-          </button>
-        ))}
-      </div>
-
-      {/* Suburb Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSuburbs.length > 0 ? (
-          filteredSuburbs.map((sub) => (
-            <div
-              key={sub.name}
-              className="bg-white rounded-2xl p-5 border border-zinc-200 hover:border-[#1E3A2B] transition-all duration-200 shadow-sm space-y-3 group"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-bold text-base text-[#162019] group-hover:text-[#1E3A2B] transition-colors">
-                    {sub.name}
-                  </h3>
-                  <span className="text-[11px] text-zinc-500">{sub.zone}</span>
-                </div>
-                <span className="flex items-center space-x-1 text-[11px] font-semibold text-[#1E3A2B] bg-[#E8EFEA] px-2.5 py-1 rounded-full border border-[#C5DACD]">
-                  <CheckCircle className="w-3 h-3 text-[#2E5E40]" />
-                  <span>Available</span>
-                </span>
-              </div>
-
-              <div className="flex items-center space-x-2 text-xs text-zinc-600">
-                <Clock className="w-3.5 h-3.5 text-[#1E3A2B]" />
-                <span>Rapid Dispatch: <strong className="text-zinc-800">{sub.dispatchTime}</strong></span>
-              </div>
-
-              <div className="pt-2 border-t border-zinc-100">
-                <p className="text-[11px] text-zinc-400 mb-1 font-medium">Popular Local Services:</p>
-                <div className="flex flex-wrap gap-1">
-                  {sub.popularServices.map((svc) => (
-                    <span key={svc} className="text-[10px] bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded font-medium">
-                      {svc}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full py-8 text-center space-y-2 bg-white rounded-2xl border border-dashed border-zinc-300">
-            <p className="text-zinc-600 text-sm font-medium">No direct suburb matches for "{searchQuery}".</p>
-            <p className="text-xs text-zinc-500">Don't worry, we cover all surrounding areas in the Greater Cape Town metropolitan area.</p>
+      {/* Suburb Grid Selector */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {SUBURB_COVERAGE.map((sub) => {
+          const isSelected = selectedSuburb === sub.name;
+          return (
             <button
-              onClick={onOpenBookingModal}
-              className="mt-2 inline-flex items-center space-x-1.5 text-xs font-bold text-[#1E3A2B] hover:underline"
+              key={sub.name}
+              onClick={() => setSelectedSuburb(sub.name)}
+              className={`p-4 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer ${
+                isSelected
+                  ? 'bg-white/95 backdrop-blur-md border-[#1B4332] shadow-lg ring-2 ring-[#1B4332]/20 scale-101'
+                  : 'bg-white/60 backdrop-blur-xs border-[#E2E8F0] hover:bg-white/90 hover:border-[#1B4332]/40 hover:shadow-sm'
+              }`}
             >
-              <span>Enquire directly for your address</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <div className="flex items-start justify-between w-full">
+                <div>
+                  <h3 className="font-bold text-sm text-[#1B4332]">{sub.name}</h3>
+                  <div className="flex items-center space-x-1 text-[11px] text-[#4A5568] mt-0.5 font-medium">
+                    <Clock className="w-3 h-3 text-[#1B4332]" />
+                    <span>Avg Dispatch: <strong>{sub.dispatchTime}</strong></span>
+                  </div>
+                </div>
+                {isSelected && (
+                  <CheckCircle2 className="w-4 h-4 text-[#52B788] shrink-0" />
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-1">
+                {sub.popularServices.map((serviceName) => (
+                  <span
+                    key={serviceName}
+                    className="text-[10px] bg-white/80 border border-[#E2E8F0] text-[#4A5568] px-2 py-0.5 rounded-md font-medium"
+                  >
+                    {serviceName}
+                  </span>
+                ))}
+              </div>
             </button>
+          );
+        })}
+      </div>
+
+      {/* Selected Zone Deep Dive Banner */}
+      <div className="bg-[#1B4332]/95 backdrop-blur-xl text-white rounded-2xl p-6 border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <ShieldCheck className="w-5 h-5 text-[#52B788]" />
+            <h4 className="font-bold text-lg font-serif-italic !text-white text-white tracking-wide">
+              Active Fleet Assigned to {current.name}
+            </h4>
           </div>
-        )}
+          <div className="flex items-center space-x-2 text-xs text-[#52B788] pt-0.5">
+            <span className="w-2 h-2 rounded-full bg-[#52B788] animate-pulse" />
+            <span className="font-medium text-[#D8ECE0]">Certified mobile unit on call • Avg response: {current.dispatchTime}</span>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onOpenBookingModal('cockroaches', { suburb: current.name, notes: `Inquiry for ${current.name} fleet dispatch (Avg response: ${current.dispatchTime})` })}
+          className="px-6 py-3 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm transition-all duration-200 shrink-0 flex items-center space-x-2 shadow-md hover:shadow-lg cursor-pointer"
+        >
+          <span>Schedule {current.name} Assessment</span>
+          <ArrowRight className="w-4 h-4 text-[#1B4332]" />
+        </button>
       </div>
 
     </div>
