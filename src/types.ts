@@ -60,8 +60,8 @@ export interface InspectionBookingData {
   phone: string;
   serviceId: string;
   suburb: string;
-  preferredDate: string;
-  preferredTime: string;
+  preferredDate?: string;
+  preferredTime?: string;
   propertyType: 'Residential' | 'Commercial' | 'Hospitality / Food Service' | 'Estate / HOA';
   notes: string;
 }

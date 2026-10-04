@@ -12,7 +12,9 @@ import {
   MessageSquare, 
   User, 
   Home, 
-  AlertCircle
+  AlertCircle,
+  CalendarCheck,
+  ExternalLink
 } from 'lucide-react';
 
 interface ContactPageProps {
@@ -63,14 +65,25 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
 
       if (response.ok && data.success) {
         setSubmittedRef(data.reference || `EW-${Math.floor(1000 + Math.random() * 9000)}`);
+        // Open live calendar in a new tab on confirmed submission while keeping confirmation visible
+        try {
+          const link = document.createElement('a');
+          link.href = 'https://calendar.app.google/Joc3dfkudXDNvmSJ8';
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch {
+          // Keep confirmation visible on screen
+        }
       } else {
         if (data.errors) {
           setValidationErrors(data.errors);
         }
         setErrorMessage(data.message || 'There was an issue processing your request. Please check the form.');
       }
-    } catch (err) {
-      console.error('Submission error:', err);
+    } catch {
       // Fallback graceful handling if server offline
       const ref = `EW-${Math.floor(1000 + Math.random() * 9000)}`;
       setSubmittedRef(ref);
@@ -91,11 +104,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-serif-italic font-bold text-[#1B4332]">
-            Let's breathe life <span className="text-[#52B788]">back into your space.</span>
+            Let's breathe life back into your space.
           </h1>
 
           <p className="text-[#4A5568] text-base max-w-2xl mx-auto leading-relaxed">
-            Reach our senior entomology team directly or request a same-day property assessment across Greater Cape Town.
+            Reach our team directly or request a same-day property assessment across Greater Cape Town.
           </p>
         </div>
       </section>
@@ -132,12 +145,24 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
                     Thank you, {formData.fullName}. An Earthwise Cape Town technician will review your request and call you shortly.
                   </p>
                 </div>
-                <button
-                  onClick={() => setSubmittedRef(null)}
-                  className="px-5 py-2 rounded-xl bg-[#1B4332] text-white text-xs font-bold hover:bg-[#132A20] transition-colors cursor-pointer"
-                >
-                  Send Another Enquiry
-                </button>
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                  <a
+                    href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2 rounded-xl bg-[#2D6A4F] text-white text-xs font-bold hover:bg-[#1B4332] transition-colors inline-flex items-center space-x-1.5 shadow-2xs"
+                  >
+                    <CalendarCheck className="w-3.5 h-3.5 text-[#52B788]" />
+                    <span>Confirm Booking Slot Picker (Live Calendar)</span>
+                    <ExternalLink className="w-3 h-3 text-white/80" />
+                  </a>
+                  <button
+                    onClick={() => setSubmittedRef(null)}
+                    className="px-5 py-2 rounded-xl bg-[#1B4332] text-white text-xs font-bold hover:bg-[#132A20] transition-colors cursor-pointer"
+                  >
+                    Send Another Enquiry
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -272,23 +297,56 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
 
                 </div>
 
+                {/* Open Live Calendar Integration Card */}
+                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#F4F7F5] via-[#EBF3EE] to-[#F4F7F5] border border-[#D8ECE0] flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#1B4332] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <CalendarCheck className="w-4 h-4 text-[#52B788]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-1.5">
+                        <span className="text-xs font-bold text-[#1B4332]">Open Live Calendar</span>
+                        <span className="text-[9px] bg-[#1B4332] text-white px-1.5 py-0.2 rounded-full font-mono">LIVE SYNC</span>
+                      </div>
+                      <p className="text-[11px] text-[#4A5568] leading-tight">
+                        Select real-time inspection slots directly on Google Calendar.
+                      </p>
+                    </div>
+                  </div>
+
+                  <a
+                    href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-white border border-[#CBD5E1] text-[#1B4332] hover:bg-[#1B4332] hover:text-white text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer"
+                    title="Open live Google Calendar in new tab"
+                  >
+                    <span>Live Calendar</span>
+                    <ExternalLink className="w-3 h-3 text-[#52B788]" />
+                  </a>
+                </div>
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3.5 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm shadow-sm hover:shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                  className="w-full py-3.5 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm shadow-sm hover:shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer group"
                 >
                   {isSubmitting ? (
                     <>
                       <span className="w-4 h-4 border-2 border-[#1B4332]/30 border-t-[#1B4332] rounded-full animate-spin" />
-                      <span>Sending Message...</span>
+                      <span>Connecting to Live Calendar...</span>
                     </>
                   ) : (
                     <>
-                      <Send className="w-4 h-4 text-[#1B4332]" />
-                      <span>Submit Proposal Request</span>
+                      <CalendarCheck className="w-4 h-4 text-[#1B4332] group-hover:scale-110 transition-transform" />
+                      <span>Confirm Booking Slot Picker</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-[#52B788]" />
                     </>
                   )}
                 </button>
+                <p className="text-[11px] text-center text-[#4A5568]">
+                  Logs your proposal assessment request & redirects directly to the live Google Calendar slot picker.
+                </p>
               </form>
             )}
 
@@ -309,7 +367,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
                   </div>
                   <div>
                     <h4 className="font-bold text-white text-sm">Physical Address</h4>
-                    <p className="text-[#D8ECE0]/80 mt-0.5">Unit 4, Botanical Park, Constantia Main Rd, Cape Town, 7806</p>
+                    <p className="text-[#D8ECE0]/80 mt-0.5">7 Buzad Road, Pelican Park, Cape Town, 7941</p>
                   </div>
                 </div>
 
@@ -331,8 +389,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
                   </div>
                   <div>
                     <h4 className="font-bold text-white text-sm">Email Correspondence</h4>
-                    <a href="mailto:info@earthwise-pest.co.za" className="text-[#D8ECE0] hover:text-white block mt-0.5">
-                      info@earthwise-pest.co.za
+                    <a href="mailto:hello@earthwisepestmanagement.co.za" className="text-[#D8ECE0] hover:text-white block mt-0.5">
+                      hello@earthwisepestmanagement.co.za
                     </a>
                   </div>
                 </div>

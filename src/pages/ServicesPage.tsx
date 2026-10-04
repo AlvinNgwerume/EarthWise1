@@ -205,13 +205,13 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate, onOpenBo
               Our Field Work & Case Studies
             </h2>
             <p className="text-[#4A5568] text-sm">
-              Real-world implementations from Atlantic Seaboard villas and Constantia wine cellars to V&A Waterfront commercial food facilities.
+              Real-world implementations from Atlantic Seaboard villas and Constantia estates to residential communities across Cape Town.
             </p>
           </div>
 
           {/* Quick Filter */}
           <div className="flex items-center space-x-2 flex-wrap">
-            {['all', 'Bird Proofing', 'Eco-Treatments', 'Ceiling Hygiene', 'Commercial'].map((cat) => (
+            {['all', 'Bird Proofing', 'Eco-Treatments', 'Ceiling Hygiene'].map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedGalleryCategory(cat)}

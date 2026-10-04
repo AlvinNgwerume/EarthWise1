@@ -4,6 +4,7 @@ import { SERVICES_DATA } from '../data/earthwiseData';
 import heroImg from '../assets/images/hero_man_inspection_1789391435749.jpg';
 import { ServiceVectorArt } from '../components/ServiceVectorArt';
 import { SuburbChecker } from '../components/SuburbChecker';
+import { DualPathwayBooking } from '../components/DualPathwayBooking';
 import { 
   ShieldCheck, 
   ArrowRight, 
@@ -276,6 +277,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenBookingMod
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* Dedicated Scheduling & Inspection Section (Dual-Pathway Split-View) */}
+      <section id="scheduling-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white/80 rounded-3xl p-4 sm:p-7 border border-[#D8ECE0] shadow-sm">
+          <DualPathwayBooking />
         </div>
       </section>
 

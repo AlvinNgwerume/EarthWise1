@@ -4,7 +4,6 @@ import ecoImg from '../assets/images/eco_pest_treatment_1785463136065.jpg';
 import birdImg from '../assets/images/bird_proofing_1785463150744.jpg';
 import ceilingImg from '../assets/images/ceiling_hygiene_1785463164905.jpg';
 import termiteImg from '../assets/images/termite_barrier_1785463180879.jpg';
-import commercialImg from '../assets/images/commercial_pest_1785463195028.jpg';
 import solarImg from '../assets/images/solar_bird_guard_1785463208275.jpg';
 
 import julianImg from '../assets/images/julian_thorne_1785463226431.jpg';
@@ -144,14 +143,14 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     location: 'Camps Bay Hotel Facade',
     description: 'Discreet stone-colored HDPE netting installed along 40m hotel courtyard to prevent pigeon nesting without obstructing panoramic ocean views.',
     imageUrl: birdImg,
-    details: ['316 Marine Grade Stainless Cable', '10-Year Tension Warranty', 'Zero View Distortion']
+    details: ['316 Marine Grade Stainless Cable', 'Max 2 - Years', 'Zero View Distortion']
   },
   {
     id: 'gal-2',
-    title: 'Precision Micro-ULV Botanical Fogging',
+    title: 'Precision Micro-ULV Fogging',
     category: 'Eco-Treatments',
-    location: 'Constantia Wine Estate Cellar',
-    description: 'Ultra-low volume botanical fogging treatment applied during grape harvesting to control vinegar flies while preserving organic wine integrity.',
+    location: 'Constantia',
+    description: 'Ultra-low volume in-house fogging treatment to control flies.',
     imageUrl: ecoImg,
     details: ['100% Organic Act 36 Approved', 'Zero Alcohol Contamination', 'Rapid 1-Hour Re-entry']
   },
@@ -172,33 +171,22 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     description: 'Custom perimeter steel wire clip mesh installed around 24 solar panels, stopping starlings from building fire-hazard nests under hot panel wiring.',
     imageUrl: solarImg,
     details: ['No Drilling - Clips to Panel Frame', 'Preserves Solar Warranty', 'UV-Coated Steel Wire']
-  },
-  {
-    id: 'gal-5',
-    title: 'Subterranean Termite Soil Barrier',
-    category: 'Eco-Treatments',
-    location: 'Tamboerskloof Victorian Home',
-    description: 'Perimeter trenching and high-pressure sub-slab liquid termiticide barrier injection protecting original Oregon pine wooden floors.',
-    imageUrl: termiteImg,
-    details: ['5-Year Guarantee Certificate', 'Sub-Slab Injection Ports', 'Non-Repellent Colony Eradication']
-  },
-  {
-    id: 'gal-6',
-    title: 'HACCP Digital Monitoring Setup',
-    category: 'Commercial',
-    location: 'V&A Waterfront Restaurant',
-    description: 'Installation of QR-coded lockable rodent stations and non-toxic sticky monitors with real-time digital logging for food compliance audits.',
-    imageUrl: commercialImg,
-    details: ['QR Scan Log System', 'Tamper-Proof Lockable Stations', 'Monthly Audit Reporting']
   }
 ];
 
 export const SUBURB_COVERAGE: SuburbCoverage[] = [
   {
+    name: 'Pelican Park & False Bay',
+    zone: 'Southern Suburbs',
+    dispatchTime: 'Under 30 mins',
+    popularServices: ['Eco-Treatments', 'Rodent Exclusion', 'Perimeter Defense'],
+    isAvailable: true
+  },
+  {
     name: 'City Bowl & CBD',
     zone: 'City Bowl',
     dispatchTime: 'Under 45 mins',
-    popularServices: ['Rodent Exclusion', 'Commercial HACCP', 'Bird Proofing'],
+    popularServices: ['Rodent Exclusion', 'Commercial Pest Prevention', 'Bird Proofing'],
     isAvailable: true
   },
   {
@@ -219,7 +207,7 @@ export const SUBURB_COVERAGE: SuburbCoverage[] = [
     name: 'Constantia & Bishopscourt',
     zone: 'Southern Suburbs',
     dispatchTime: 'Under 60 mins',
-    popularServices: ['Termite Soil Barrier', 'Ceiling Hygiene', 'Winery HACCP'],
+    popularServices: ['Termite Soil Barrier', 'Ceiling Hygiene', 'Winery Pest Management'],
     isAvailable: true
   },
   {
@@ -288,7 +276,7 @@ export const FAQ_ITEMS: FAQItem[] = [
     id: 'faq-5',
     category: 'Warranties & Results',
     question: 'What kind of guarantee or warranty do you provide on your services?',
-    answer: 'We stand firmly behind our craftsmanship. Standard eco-treatments carry a 3-month to 6-month complimentary re-service warranty. Subterranean termite liquid barriers are guaranteed for 5 years, and commercial high-tension bird netting installations include a 10-year structural warranty.'
+    answer: 'We stand firmly behind our craftsmanship. Standard eco-treatments carry a 3-month to 6-month complimentary re-service warranty. Subterranean termite liquid barriers are guaranteed for 5 years, and commercial high-tension bird netting installations include up to 2 years structural warranty.'
   },
   {
     id: 'faq-6',

@@ -172,7 +172,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({
               <div className="space-y-2">
                 <h3 className="font-bold text-base text-[#1B4332]">6. Your Rights Under POPIA</h3>
                 <p>
-                  You have the statutory right to request access to, correction of, or deletion of your personal records. For inquiries or data amendments, contact our designated Information Officer at <a href="mailto:info@earthwise-pest.co.za" className="text-[#1B4332] font-bold underline">info@earthwise-pest.co.za</a>.
+                  You have the statutory right to request access to, correction of, or deletion of your personal records. For inquiries or data amendments, contact our designated Information Officer at <a href="mailto:hello@earthwisepestmanagement.co.za" className="text-[#1B4332] font-bold underline">hello@earthwisepestmanagement.co.za</a>.
                 </p>
               </div>
             </div>
@@ -228,7 +228,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({
                   <ul className="text-xs text-[#4A5568] space-y-1 pl-6 list-disc">
                     <li><strong>General Pest Treatments (Cockroaches, Ants):</strong> 3-Month to 6-Month re-service warranty if pests persist.</li>
                     <li><strong>Subterranean Termite Barriers:</strong> 5-Year transferable structural barrier guarantee certificate.</li>
-                    <li><strong>Avian Proofing (Tension Netting & Marine Spikes):</strong> 10-Year hardware and structural tension warranty.</li>
+                    <li><strong>Avian Proofing (Tension Netting & Marine Spikes):</strong> Up to 2-Year hardware and structural warranty.</li>
                   </ul>
                 </div>
               </div>

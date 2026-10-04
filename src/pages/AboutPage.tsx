@@ -28,7 +28,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookingM
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif-italic font-bold text-[#1B4332]">
-            About <span className="text-[#52B788]">Earthwise</span>
+            About Earthwise
           </h1>
 
           <p className="text-[#4A5568] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
@@ -99,10 +99,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookingM
                   — {item.desc}
                 </p>
               </div>
-              <div className="pt-2">
-                <div className="w-full h-1 bg-[#F4F7F5] rounded-full overflow-hidden">
-                  <div className="w-1/3 h-full bg-[#52B788]" />
-                </div>
+              <div className="pt-3 border-t border-[#E2E8F0]/80 flex items-center space-x-2 text-xs font-semibold text-[#1B4332]">
+                <CheckCircle2 className="w-4 h-4 text-[#52B788] shrink-0" />
+                <span className="text-[11px] uppercase tracking-wider text-[#2D6A4F] font-bold">Verified & Guaranteed</span>
               </div>
             </div>
           ))}
@@ -129,7 +128,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookingM
             {[
               { title: 'Act 36 of 1947', desc: 'All chemical formulations registered and approved under Department of Agriculture rules.' },
               { title: 'SAPCA Certified', desc: 'Full corporate membership with the South African Pest Control Association.' },
-              { title: 'HACCP Audit Ready', desc: 'Compliant with strict international food hygiene & safety standards.' },
+              { title: 'Food Safety Audit Ready', desc: 'Compliant with strict international commercial hygiene & safety standards.' },
               { title: 'SABS Approved', desc: 'Equipped with South African Bureau of Standards verified protection methods.' }
             ].map((cert, idx) => (
               <div key={idx} className="bg-[#132A20]/90 backdrop-blur-xs p-5 rounded-2xl border border-[#2D6A4F] space-y-2 hover:border-[#52B788]/60 transition-colors">

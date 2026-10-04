@@ -41,7 +41,7 @@ export const SuburbChecker: React.FC<SuburbCheckerProps> = ({ onOpenBookingModal
               onClick={() => setSelectedSuburb(sub.name)}
               className={`p-4 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer ${
                 isSelected
-                  ? 'bg-white/95 backdrop-blur-md border-[#1B4332] shadow-lg ring-2 ring-[#1B4332]/20 scale-101'
+                  ? 'bg-white/95 backdrop-blur-md border-[#1B4332] shadow-lg ring-2 ring-[#1B4332]/20 scale-[1.01]'
                   : 'bg-white/60 backdrop-blur-xs border-[#E2E8F0] hover:bg-white/90 hover:border-[#1B4332]/40 hover:shadow-sm'
               }`}
             >

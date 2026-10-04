@@ -58,7 +58,7 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
       badge: '316 Marine Stainless & Netting',
       timeframe: 'Custom architectural fitment',
       strategy: 'UV-stabilised netting, solar panel guards, and marine-grade stainless steel spike barriers.',
-      safetyNote: '100% Humane physical exclusion with 10-year tension guarantee.'
+      safetyNote: '100% Humane physical exclusion with up to 2-year tension guarantee.'
     },
     'bat-removal': {
       title: 'Bat Removal',
@@ -148,7 +148,7 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
                   onClick={() => setPropertySize(size.id as any)}
                   className={`py-2.5 px-3 rounded-xl border text-center transition-all duration-200 cursor-pointer ${
                     propertySize === size.id
-                      ? 'bg-[#2D6A4F] text-white border-[#52B788] font-bold shadow-xs scale-102'
+                      ? 'bg-[#2D6A4F] text-white border-[#52B788] font-bold shadow-xs scale-[1.02]'
                       : 'bg-[#132A20]/80 text-[#D8ECE0]/80 border-[#2D6A4F]/80 hover:text-white hover:border-[#52B788]/50'
                   }`}
                 >

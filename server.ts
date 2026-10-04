@@ -25,7 +25,6 @@ app.use((req: Request, res: Response, next) => {
 
   // Security Headers
   res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("X-XSS-Protection", "1; mode=block");
 
@@ -254,7 +253,7 @@ async function sendNotificationEmail(data: ContactSubmissionPayload, refCode: st
   const smtpPort = parseInt(process.env.SMTP_PORT || "587", 10);
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
-  const notificationRecipient = process.env.NOTIFICATION_EMAIL || smtpUser || "owner@earthwise-pest.co.za";
+  const notificationRecipient = process.env.NOTIFICATION_EMAIL || smtpUser || "hello@earthwisepestmanagement.co.za";
 
   if (!smtpHost || !smtpUser || !smtpPass) {
     console.warn("⚠️ SMTP Credentials missing in environment variables. Skipping Nodemailer dispatch.");
@@ -441,7 +440,7 @@ const handleSubmission = async (req: Request, res: Response) => {
 
     const payload: ContactSubmissionPayload = {
       fullName: req.body.fullName || (req.body.source?.includes("Bot") ? "Chatbot Prospect" : "Valued Customer"),
-      email: req.body.email || (req.body.source?.includes("Bot") ? `bot-lead-${Date.now()}@lead.earthwise-pest.co.za` : "info@earthwise-pest.co.za"),
+      email: req.body.email || (req.body.source?.includes("Bot") ? `bot-lead-${Date.now()}@lead.earthwise-pest.co.za` : "hello@earthwisepestmanagement.co.za"),
       phone: req.body.phone || "Awaiting phone in triage",
       serviceId: req.body.serviceId || req.body.service || "eco-treatments",
       suburb: req.body.suburb || "City Bowl & CBD",
@@ -508,23 +507,28 @@ function getGenAI(): GoogleGenAI | null {
   return genAIClient;
 }
 
-const BOT_SYSTEM_PROMPT = `You are Eco-Bot, the virtual assistant for Earthwise Pest Management in Cape Town, South Africa. Your mission is to provide expert, eco-conscious guidance and collect qualified lead information for pest control service assessments.
+const BOT_SYSTEM_PROMPT = `You are Eco-Bot, the virtual assistant for Earthwise Pest Management in Cape Town, South Africa. The objective is to provide expert, eco-conscious guidance and collect qualified lead details for pest control service assessments.
 
-BRAND VOICE & DOMAIN RULES:
+BRAND VOICE & COMPLIANCE:
 1. Tone: Professional, reassuring, eco-conscious, and efficient.
 2. Compliance: Emphasize child-safe, pet-safe, and environmentally responsible methods compliant with Act No. 36 of 1947 standards.
-3. Conciseness: Keep responses under 3 sentences. Ask only ONE question at a time to keep conversations natural.
+3. Conciseness: Keep responses under 3 sentences. Ask only ONE question at a time to maintain natural conversation.
 4. Primary Suburbs Covered: Cape Town City Bowl, Atlantic Seaboard, Southern Suburbs, Northern Suburbs, and Helderberg.
 
 QUALIFICATION & LEAD CAPTURE WORKFLOW:
-Collect the following four datapoints systematically:
+Systematically collect the following four datapoints:
 1. Pest Type (e.g., cockroaches, rodents/rats, ants, bedbugs, fleas, termites, wasps).
 2. Property Type (Residential or Commercial).
-3. Suburb/Location in Cape Town.
+3. Suburb / Area in Cape Town.
 4. Contact Details (Client Name and Phone/WhatsApp number).
 
+BOOKING & LINK DIRECTIVE:
+- When a customer asks to view available inspection dates, book an appointment, or choose a time slot, provide the direct booking link:
+  "You can view open inspection slots and select a date directly on our calendar here: https://calendar.app.google/Joc3dfkudXDNvmSJ8"
+- If the user prefers to share their details directly in chat instead of clicking the link, request their Phone/WhatsApp number and Suburb so an Earthwise technician can confirm the inspection slot with them directly.
+
 HANDOFF TRIGGER:
-Once the client provides their phone number or contact details, respond with a confirmation message reassuring them that an Earthwise technician will contact them shortly via WhatsApp or call. Include the summary of their service request in your final response. Keep your reply under 3 sentences.`;
+Once contact details or a booking request are submitted, confirm that an Earthwise field technician will reach out via WhatsApp/call shortly to confirm the property inspection details.`;
 
 // Fallback deterministic response generator strictly matching Eco-Bot workflow & handoff rules
 function generateDeterministicDispatchResponse(
@@ -541,37 +545,7 @@ function generateDeterministicDispatchResponse(
 ) {
   const text = userText.toLowerCase();
 
-  // Safety / Pet / Child Compliance FAQ (Act No. 36 of 1947)
-  if (text.includes("pet") || text.includes("child") || text.includes("dog") || text.includes("cat") || text.includes("safe") || text.includes("toxic") || text.includes("chemical") || text.includes("act 36")) {
-    return {
-      text: "All Earthwise treatments are child-safe, pet-safe, and environmentally responsible, strictly compliant with South African Act No. 36 of 1947 standards. What specific pest issue are you currently experiencing?",
-      actionType: "book",
-      suggestedNext: "I have an issue with rodents",
-      phase: currentTriage.phase || 1
-    };
-  }
-
-  // Cost / Pricing FAQ
-  if (text.includes("cost") || text.includes("price") || text.includes("how much") || text.includes("quote") || text.includes("rate") || text.includes("fee")) {
-    return {
-      text: "Our pricing is transparent and tailored to your property layout and pest severity following a brief assessment. What type of pest are you noticing on your property?",
-      actionType: "book",
-      suggestedNext: "Cockroaches in the kitchen",
-      phase: currentTriage.phase || 1
-    };
-  }
-
-  // Speed / Turnaround FAQ
-  if (text.includes("how fast") || text.includes("how soon") || text.includes("dispatch") || text.includes("emergency") || text.includes("turnaround") || text.includes("arrival") || text.includes("urgent")) {
-    return {
-      text: "We provide rapid turnaround times across Cape Town with same-day emergency dispatch and routine inspections within 24 to 48 hours. Is your property residential or commercial?",
-      actionType: "book",
-      suggestedNext: "Residential home",
-      phase: 2
-    };
-  }
-
-  // 4. HANDOFF TRIGGER: Client provides phone number or contact details
+  // 1. HANDOFF TRIGGER: Once contact details or a booking request are submitted
   const phoneMatch = userText.match(/(?:(?:\+27|0)\s*\d{2}\s*\d{3}\s*\d{4}|\d{10})/);
   const hasNameIndicator = text.includes("my name is") || text.includes("i'm ") || text.includes("im ") || text.includes("this is ");
   const nameMatch = userText.match(/(?:i'm|im|i am|name is|this is)\s+([A-Za-z]+)/i);
@@ -580,39 +554,86 @@ function generateDeterministicDispatchResponse(
   const detectedPhone = phoneMatch ? phoneMatch[0].replace(/\s+/g, '') : (currentTriage.phone || "");
 
   if (phoneMatch || (hasNameIndicator && currentTriage.phone)) {
-    const pestSummary = currentTriage.pest || "Pest inspection";
-    const propSummary = currentTriage.propertyType || "Property";
-    const suburbSummary = currentTriage.suburb || "Cape Town";
-    const clientGreeting = detectedName ? `Thank you, ${detectedName}! ` : "Thank you! ";
-    
+    const greeting = detectedName ? `Thank you, ${detectedName}! ` : "Thank you! ";
     return {
-      text: `${clientGreeting}An Earthwise technician will contact you shortly via WhatsApp or call to arrange your service assessment. Request Summary: ${pestSummary} | ${propSummary} | ${suburbSummary} | Contact: ${detectedPhone || detectedName}.`,
+      text: `${greeting}An Earthwise field technician will reach out via WhatsApp or call shortly to confirm the property inspection details.`,
       actionType: "book",
-      suggestedNext: "Schedule preferred time slot",
+      suggestedNext: "Thank you, noted",
       phase: 4
     };
   }
 
-  // 3. Suburb/Location in Cape Town provided -> Request Contact Details (Datapoint 4)
+  // 2. BOOKING & LINK DIRECTIVE: When customer asks to view available inspection dates, book an appointment, or choose a time slot
+  if (
+    text.includes("book") ||
+    text.includes("calendar") ||
+    text.includes("slot") ||
+    text.includes("date") ||
+    text.includes("appointment") ||
+    text.includes("schedule") ||
+    text.includes("available inspection") ||
+    text.includes("open inspection") ||
+    text.includes("time slot")
+  ) {
+    return {
+      text: "You can view open inspection slots and select a date directly on our calendar here: https://calendar.app.google/Joc3dfkudXDNvmSJ8\nIf you prefer to share your details directly in chat instead of clicking the link, what is your Phone/WhatsApp number and Suburb so an Earthwise technician can confirm the inspection slot with you directly?",
+      actionType: "calendar",
+      suggestedNext: "082 123 4567, City Bowl",
+      calendarLink: "https://calendar.app.google/Joc3dfkudXDNvmSJ8",
+      phase: 4
+    };
+  }
+
+  // 3. Safety / Pet / Child Compliance FAQ (Act No. 36 of 1947)
+  if (text.includes("pet") || text.includes("child") || text.includes("dog") || text.includes("cat") || text.includes("safe") || text.includes("toxic") || text.includes("chemical") || text.includes("act 36")) {
+    return {
+      text: "All Earthwise treatments are child-safe, pet-safe, and environmentally responsible, compliant with Act No. 36 of 1947 standards. What specific pest issue are you currently experiencing on your property?",
+      actionType: "book",
+      suggestedNext: "I have an issue with rodents",
+      phase: currentTriage.phase || 1
+    };
+  }
+
+  // 4. Cost / Pricing FAQ
+  if (text.includes("cost") || text.includes("price") || text.includes("how much") || text.includes("quote") || text.includes("rate") || text.includes("fee")) {
+    return {
+      text: "Our pricing is transparent and tailored to your property layout and pest severity following a brief assessment. What type of pest are you currently experiencing on your property?",
+      actionType: "book",
+      suggestedNext: "Cockroaches in the kitchen",
+      phase: currentTriage.phase || 1
+    };
+  }
+
+  // 5. Speed / Turnaround FAQ
+  if (text.includes("how fast") || text.includes("how soon") || text.includes("dispatch") || text.includes("emergency") || text.includes("turnaround") || text.includes("arrival") || text.includes("urgent")) {
+    return {
+      text: "We provide rapid turnaround times across Cape Town with same-day emergency dispatch and routine inspections within 24 to 48 hours. Is your property residential or commercial?",
+      actionType: "book",
+      suggestedNext: "Residential property",
+      phase: 2
+    };
+  }
+
+  // 6. Suburb / Area in Cape Town provided -> Request Contact Details (Datapoint 4)
   const capeSuburbs = [
     "city bowl", "gardens", "camps bay", "sea point", "green point", "atlantic seaboard",
     "rondebosch", "claremont", "newlands", "constantia", "southern suburbs", "hout bay",
     "durbanville", "bellville", "northern suburbs", "blouberg", "table view",
-    "somerset west", "helderberg", "strand", "gordon's bay", "pinelands", "kenilworth"
+    "somerset west", "helderberg", "strand", "gordon's bay", "pinelands", "kenilworth", "pelican park"
   ];
   const matchedSuburb = capeSuburbs.find(s => text.includes(s));
 
   if (matchedSuburb || (currentTriage.suburb && !currentTriage.phone)) {
     const formattedSuburb = matchedSuburb ? matchedSuburb.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : (currentTriage.suburb || "Cape Town");
     return {
-      text: `We service ${formattedSuburb} daily with Act No. 36 compliant, pet-safe treatments. Could you please provide your full name and phone/WhatsApp number so our technician can contact you with a tailored assessment?`,
+      text: `We service ${formattedSuburb} daily with Act No. 36 compliant, pet-safe methods. Could you please provide your Client Name and Phone/WhatsApp number so an Earthwise technician can confirm your service assessment?`,
       actionType: "book",
       suggestedNext: "Sarah, 082 123 4567",
       phase: 4
     };
   }
 
-  // 2. Property Type provided (Residential or Commercial) -> Request Suburb (Datapoint 3)
+  // 7. Property Type provided (Residential or Commercial) -> Request Suburb / Area in Cape Town (Datapoint 3)
   const isResidential = text.includes("residential") || text.includes("house") || text.includes("home") || text.includes("flat") || text.includes("apartment");
   const isCommercial = text.includes("commercial") || text.includes("office") || text.includes("business") || text.includes("restaurant") || text.includes("warehouse");
 
@@ -626,11 +647,11 @@ function generateDeterministicDispatchResponse(
     };
   }
 
-  // 1. Pest Type provided -> Request Property Type (Datapoint 2)
+  // 8. Pest Type provided -> Request Property Type (Datapoint 2)
   const pestKeywords = ["cockroach", "roach", "rat", "rodent", "mouse", "mice", "ant", "bedbug", "bed bug", "flea", "termite", "wasp", "bee", "bird", "bat", "mole"];
   if (pestKeywords.some(k => text.includes(k))) {
     return {
-      text: "Dealing with pests can be stressful, but our eco-conscious treatments resolve infestations safely for children and pets. Is this for a residential or commercial property?",
+      text: "Our eco-conscious treatments resolve infestations safely for children and pets compliant with Act No. 36 standards. Is this for a residential or commercial property?",
       actionType: "book",
       suggestedNext: "Residential property",
       phase: 2
@@ -639,9 +660,9 @@ function generateDeterministicDispatchResponse(
 
   // Initial Entry Greeting
   return {
-    text: "Hello! I am Eco-Bot, your virtual assistant for Earthwise Pest Management. What pest issue are you currently experiencing on your property?",
+    text: "Hello! I am Eco-Bot, the virtual assistant for Earthwise Pest Management in Cape Town. We provide expert, eco-conscious guidance compliant with Act No. 36 of 1947 standards. What pest issue are you currently experiencing on your property?",
     actionType: "book",
-    suggestedNext: "I have a cockroach problem in my kitchen",
+    suggestedNext: "Cockroaches in the kitchen",
     phase: 1
   };
 }
@@ -710,13 +731,14 @@ app.post("/api/bot/chat", async (req: Request, res: Response) => {
       }
     }
 
-    // Deterministic fallback calibrated to the PDF script & guardrails
+    // Deterministic fallback calibrated to Eco-Bot workflow & guardrails
     const result = generateDeterministicDispatchResponse(userMessage, history, triageData);
     return res.json({
       reply: result.text,
       source: "rule-calibrated-dispatch",
       actionType: result.actionType,
       suggestedNext: result.suggestedNext,
+      calendarLink: (result as any).calendarLink,
       phase: result.phase,
       status: "Active",
       trainingStage: "Active",
@@ -735,22 +757,24 @@ const handleBotStatus = (req: Request, res: Response) => {
   res.json({
     status: "Active",
     botName: "Eco-Bot",
-    frameworkName: "Earthwise Eco-Bot AI Assistant",
-    version: "3.0-eco-bot",
-    persona: "Eco-Bot, Virtual Assistant for Earthwise Pest Management",
+    frameworkName: "Earthwise Eco-Bot Virtual Assistant",
+    version: "4.0-eco-bot",
+    persona: "Eco-Bot, Virtual Assistant for Earthwise Pest Management in Cape Town",
     tone: "Professional, reassuring, eco-conscious, and efficient",
-    objective: "Qualify prospective leads and collect key service details across Cape Town in an eco-conscious tone compliant with Act No. 36 of 1947",
+    compliance: "Act No. 36 of 1947 standards (child-safe, pet-safe, environmentally responsible)",
+    primarySuburbs: ["Cape Town City Bowl", "Atlantic Seaboard", "Southern Suburbs", "Northern Suburbs", "Helderberg"],
+    bookingLink: "https://calendar.app.google/Joc3dfkudXDNvmSJ8",
     coreTasks: [
-      "1. Identify the pest issue (e.g., cockroaches, rodents/rats, ants, bedbugs, fleas, termites, wasps)",
-      "2. Identify property type (Residential or Commercial)",
-      "3. Identify Cape Town suburb / location",
-      "4. Collect contact details (Client Name and Phone/WhatsApp number) and trigger technician dispatch handoff"
+      "1. Pest Type (e.g., cockroaches, rodents/rats, ants, bedbugs, fleas, termites, wasps)",
+      "2. Property Type (Residential or Commercial)",
+      "3. Suburb / Area in Cape Town",
+      "4. Contact Details (Client Name and Phone/WhatsApp number)"
     ],
     behaviorRules: [
-      "Keep replies concise (under 3 sentences max)",
-      "Ask only ONE question at a time to avoid overwhelming the customer",
-      "Highlight Act No. 36 of 1947 child-safe, pet-safe, and environmentally responsible methods",
-      "Provide a concise request summary and reassurance of prompt technician follow-up upon receiving contact info"
+      "Keep responses under 3 sentences",
+      "Ask only ONE question at a time to maintain natural conversation",
+      "Provide calendar link (https://calendar.app.google/Joc3dfkudXDNvmSJ8) for appointment or inspection slot inquiries",
+      "Once contact details or booking request are submitted, confirm Earthwise field technician will reach out via WhatsApp/call shortly"
     ],
     geminiEnabled: Boolean(process.env.GEMINI_API_KEY)
   });

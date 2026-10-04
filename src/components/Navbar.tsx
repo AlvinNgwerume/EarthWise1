@@ -144,17 +144,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
               </button>
             </div>
 
-            {/* Mobile Hamburger Button */}
-            <div className="flex md:hidden items-center space-x-2">
+            {/* Mobile Action Icons (Uniform dimensions and symmetrical spacing) */}
+            <div className="flex md:hidden items-center space-x-2 sm:space-x-2.5">
               <a
                 href="https://wa.me/27622118851?text=Hello%20Earthwise%20Pest%20Management%2C%20I%20would%20like%20to%20inquire%20about%20your%20pest%20control%20services."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-[#25D366] text-white font-bold text-xs flex items-center justify-center"
-                aria-label="WhatsApp"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                aria-label="Chat on WhatsApp"
+                title="WhatsApp Dispatch"
               >
                 <svg
-                  className="w-4 h-4 fill-current text-white"
+                  className="w-[18px] h-[18px] fill-current text-white shrink-0"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -163,17 +164,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
               </a>
               <button
                 onClick={onOpenBookingModal}
-                className="p-2 rounded-lg border border-[#CBD5E1] bg-white text-[#1B4332] font-bold text-xs flex items-center space-x-1 hover:border-[#1B4332] hover:bg-[#F4F7F5]"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] flex items-center justify-center shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer"
                 aria-label="Book inspection"
+                title="Book Property Inspection"
               >
-                <CalendarCheck className="w-4 h-4" />
+                <CalendarCheck className="w-[18px] h-[18px]" />
               </button>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg border border-[#CBD5E1] text-[#4A5568] hover:bg-[#F4F7F5] focus:outline-none"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] flex items-center justify-center shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer focus:outline-none"
                 aria-label="Toggle menu"
               >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {mobileMenuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
               </button>
             </div>
           </div>

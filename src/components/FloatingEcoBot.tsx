@@ -26,8 +26,9 @@ interface Message {
   sender: 'bot' | 'user';
   text: string;
   timestamp: string;
-  actionType?: 'book' | 'whatsapp' | 'services' | 'quick-slot';
+  actionType?: 'book' | 'whatsapp' | 'services' | 'quick-slot' | 'calendar';
   quickSlots?: string[];
+  calendarLink?: string;
   bookingData?: {
     serviceId?: string;
     suburb?: string;
@@ -62,18 +63,18 @@ const INITIAL_MESSAGES: Message[] = [
   {
     id: 'msg-init-1',
     sender: 'bot',
-    text: "Hello! I'm Eco-Bot 🌱, the virtual assistant for Earthwise Pest Management in Cape Town. We provide expert, eco-conscious pest guidance that is child-safe, pet-safe, and compliant with Act No. 36 of 1947 standards. What pest issue are you currently experiencing on your property?",
+    text: "Hello! I am Eco-Bot, the virtual assistant for Earthwise Pest Management in Cape Town. We provide expert, eco-conscious guidance compliant with Act No. 36 of 1947 standards. What pest issue are you currently experiencing on your property?",
     timestamp: 'Just now',
     actionType: 'book'
   }
 ];
 
 const SUGGESTED_QUESTIONS = [
+  "View available inspection dates",
   "Cockroaches in my kitchen",
-  "Rodents or rats in the roof",
-  "Are your treatments child-safe and pet-safe?",
-  "Residential termite inspection",
-  "Commercial kitchen pest assessment"
+  "Rodents or rats on property",
+  "Are treatments child-safe and pet-safe?",
+  "Commercial property assessment"
 ];
 
 export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
@@ -156,7 +157,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
         'City Bowl', 'Gardens', 'Camps Bay', 'Sea Point', 'Green Point', 'Atlantic Seaboard',
         'Claremont', 'Rondebosch', 'Newlands', 'Constantia', 'Southern Suburbs', 'Hout Bay',
         'Durbanville', 'Bellville', 'Northern Suburbs', 'Blouberg', 'Table View',
-        'Somerset West', 'Helderberg', 'Strand', "Gordon's Bay", 'Pinelands', 'Kenilworth', 'Waterfront', 'Bantry Bay', 'Fresnaye'
+        'Somerset West', 'Helderberg', 'Strand', "Gordon's Bay", 'Pinelands', 'Kenilworth', 'Waterfront', 'Bantry Bay', 'Fresnaye', 'Pelican Park'
       ];
       for (const s of primaryCapeTownSuburbs) {
         if (text.includes(s.toLowerCase())) {
@@ -225,8 +226,9 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
 
     // Call server AI endpoint with fallback to instant local training engine
     let botReply = '';
-    let action: 'book' | 'whatsapp' | 'services' | 'quick-slot' | undefined = 'book';
+    let action: 'book' | 'whatsapp' | 'services' | 'quick-slot' | 'calendar' | undefined = 'book';
     let quickSlots: string[] | undefined;
+    let calendarLink: string | undefined;
 
     try {
       const historyPayload = messages.slice(-4).map(m => ({
@@ -248,6 +250,12 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
         const data = await res.json();
         if (data.reply) {
           botReply = data.reply;
+          if (data.calendarLink) {
+            calendarLink = data.calendarLink;
+          }
+          if (data.actionType) {
+            action = data.actionType;
+          }
         }
       }
     } catch {
@@ -258,52 +266,67 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
     if (!botReply) {
       const lower = text.toLowerCase();
 
-      // FAQ Guardrails (Concise under 3 sentences, 1 question at a time, Act No. 36 child/pet safe)
-      if (lower.includes('pet') || lower.includes('child') || lower.includes('dog') || lower.includes('cat') || lower.includes('safe') || lower.includes('toxic') || lower.includes('chemical') || lower.includes('act 36')) {
-        botReply = "All Earthwise treatments are child-safe, pet-safe, and environmentally responsible, fully compliant with Act No. 36 of 1947 standards. What specific pest issue are you currently experiencing?";
+      // 1. HANDOFF TRIGGER: Once contact details or a booking request are submitted
+      if (updatedTriage.phone || (updatedTriage.fullName && updatedTriage.phone)) {
+        const greeting = updatedTriage.fullName ? `Thank you, ${updatedTriage.fullName}! ` : "Thank you! ";
+        botReply = `${greeting}An Earthwise field technician will reach out via WhatsApp or call shortly to confirm the property inspection details.`;
+        action = 'book';
+      }
+      // 2. BOOKING & LINK DIRECTIVE: Customer asks to view available inspection dates, book an appointment, or choose a time slot
+      else if (
+        lower.includes('book') ||
+        lower.includes('calendar') ||
+        lower.includes('slot') ||
+        lower.includes('date') ||
+        lower.includes('appointment') ||
+        lower.includes('schedule') ||
+        lower.includes('available inspection') ||
+        lower.includes('open inspection') ||
+        lower.includes('time slot')
+      ) {
+        botReply = "You can view open inspection slots and select a date directly on our calendar here: https://calendar.app.google/Joc3dfkudXDNvmSJ8\nIf you prefer to share your details directly in chat instead of clicking the link, what is your Phone/WhatsApp number and Suburb so an Earthwise technician can confirm the inspection slot with you directly?";
+        action = 'calendar';
+        calendarLink = 'https://calendar.app.google/Joc3dfkudXDNvmSJ8';
+      }
+      // 3. FAQ Guardrails (Concise under 3 sentences, 1 question at a time, Act No. 36 child/pet safe)
+      else if (lower.includes('pet') || lower.includes('child') || lower.includes('dog') || lower.includes('cat') || lower.includes('safe') || lower.includes('toxic') || lower.includes('chemical') || lower.includes('act 36')) {
+        botReply = "All Earthwise treatments are child-safe, pet-safe, and environmentally responsible, compliant with Act No. 36 of 1947 standards. What specific pest issue are you currently experiencing on your property?";
         action = 'book';
       }
       else if (lower.includes('cost') || lower.includes('price') || lower.includes('how much') || lower.includes('quote') || lower.includes('rate') || lower.includes('fee')) {
-        botReply = "Our pricing is transparent and tailored to your property layout and pest severity following a brief assessment. What type of pest are you seeing on your property?";
+        botReply = "Our pricing is transparent and tailored to your property layout and pest severity following a brief assessment. What type of pest are you currently experiencing on your property?";
         action = 'book';
       }
       else if (lower.includes('fast') || lower.includes('soon') || lower.includes('how quickly') || lower.includes('time') || lower.includes('emergency') || lower.includes('dispatch') || lower.includes('turnaround')) {
-        botReply = "We provide rapid turnaround across Cape Town with same-day emergency dispatch and standard assessments within 24 to 48 hours. Is your property residential or commercial?";
+        botReply = "We provide rapid turnaround times across Cape Town with same-day emergency dispatch and routine inspections within 24 to 48 hours. Is your property residential or commercial?";
         action = 'quick-slot';
         quickSlots = ['Residential property', 'Commercial property'];
       }
-      // HANDOFF TRIGGER: Client provides phone number or contact details
-      else if (updatedTriage.phone || (updatedTriage.fullName && updatedTriage.phone)) {
-        const nameGreeting = updatedTriage.fullName ? `Thank you, ${updatedTriage.fullName}! ` : "Thank you! ";
-        const summary = `Pest: ${updatedTriage.pest || 'Pest Assessment'} | Property: ${updatedTriage.propertyType || 'Residential'} | Location: ${updatedTriage.suburb || 'Cape Town'} | Contact: ${updatedTriage.phone}`;
-        botReply = `${nameGreeting}An Earthwise technician will contact you shortly via WhatsApp or call to arrange your service assessment. Request Summary: ${summary}.`;
-        action = 'book';
-      }
-      // Step 3: Suburb/Location provided -> Request Contact Details (Name & Phone/WhatsApp)
+      // 4. Suburb / Area in Cape Town provided -> Request Contact Details (Datapoint 4)
       else if (updatedTriage.suburb) {
-        botReply = `We service ${updatedTriage.suburb} daily with Act No. 36 compliant, pet-safe solutions. Could you please provide your full name and phone or WhatsApp number so our technician can contact you?`;
+        botReply = `We service ${updatedTriage.suburb} daily with Act No. 36 compliant, pet-safe methods. Could you please provide your Client Name and Phone/WhatsApp number so an Earthwise technician can confirm your service assessment?`;
         action = 'book';
       }
-      // Step 2: Property Type provided -> Request Suburb/Location in Cape Town
+      // 5. Property Type provided -> Request Suburb / Area in Cape Town (Datapoint 3)
       else if (updatedTriage.propertyType) {
-        botReply = `Understood, we have specialized ${updatedTriage.propertyType.toLowerCase()} teams operating across Cape Town. Which suburb or area in Cape Town is the property located in?`;
+        botReply = `Understood, we have dedicated ${updatedTriage.propertyType.toLowerCase()} teams across Cape Town. Which suburb or area in Cape Town is the property located in?`;
         action = 'quick-slot';
         quickSlots = ['City Bowl / Atlantic Seaboard', 'Southern Suburbs', 'Northern Suburbs', 'Helderberg'];
       }
-      // Step 1: Pest identified -> Request Property Type (Residential or Commercial)
+      // 6. Pest identified -> Request Property Type (Datapoint 2)
       else if (updatedTriage.pest) {
-        botReply = "Dealing with pests can be stressful, but our eco-conscious treatments resolve infestations safely for children and pets. Is this for a residential or commercial property?";
+        botReply = "Our eco-conscious treatments resolve infestations safely for children and pets compliant with Act No. 36 standards. Is this for a residential or commercial property?";
         action = 'quick-slot';
         quickSlots = ['Residential property', 'Commercial property'];
       }
       // Initial Entry Prompt
       else {
-        botReply = "Hello! I am Eco-Bot, your virtual assistant for Earthwise Pest Management in Cape Town. What pest issue are you currently experiencing on your property?";
+        botReply = "Hello! I am Eco-Bot, the virtual assistant for Earthwise Pest Management in Cape Town. We provide expert, eco-conscious guidance compliant with Act No. 36 of 1947 standards. What pest issue are you currently experiencing on your property?";
         action = 'book';
       }
     }
 
-    // Auto-sync lead to HubSpot if name and phone are now available
+    // Auto-sync lead to CRM if name and phone are now available
     if (updatedTriage.phone && !updatedTriage.leadSynced) {
       triggerBackgroundLeadSync(updatedTriage);
     }
@@ -316,6 +339,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       actionType: action,
       quickSlots,
+      calendarLink: calendarLink || (botReply.includes('calendar.app.google') ? 'https://calendar.app.google/Joc3dfkudXDNvmSJ8' : undefined),
       bookingData: {
         serviceId: mapPestToServiceId(updatedTriage.pest),
         suburb: updatedTriage.suburb || undefined,
@@ -369,8 +393,8 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
           referenceCode: resData.reference || `EW-${Math.floor(10000 + Math.random() * 90000)}`
         }));
       }
-    } catch (e) {
-      console.warn('Background HubSpot lead sync deferred:', e);
+    } catch {
+      // Background lead sync deferred gracefully
     } finally {
       setIsSyncingLead(false);
     }
@@ -413,7 +437,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
             setIsOpen(true);
             setIsMinimized(false);
           }}
-          className="group flex items-center bg-[#1B4332]/95 backdrop-blur-md hover:bg-[#132A20] text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-[0_10px_35px_rgba(27,67,50,0.35)] transition-all duration-300 hover:scale-105 active:scale-95 border border-[#52B788]/60 cursor-pointer"
+          className="group flex items-center justify-center bg-[#1B4332]/95 backdrop-blur-md hover:bg-[#132A20] text-white w-12 h-12 sm:w-auto sm:h-auto rounded-full p-0 sm:px-4 sm:py-3 shadow-[0_10px_35px_rgba(27,67,50,0.35)] transition-all duration-300 hover:scale-105 active:scale-95 border border-[#52B788]/60 cursor-pointer"
           aria-label="Open Eco-Bot Assistant"
         >
           <div className="relative flex items-center justify-center">
@@ -449,9 +473,18 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
         <div
           id="ecobot-minimized-bar"
           onClick={() => setIsMinimized(false)}
-          className="group flex items-center justify-between bg-[#1B4332]/95 backdrop-blur-xl hover:bg-[#153427] text-white px-3.5 py-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.25)] transition-all duration-300 border border-[#52B788]/70 cursor-pointer w-[92vw] sm:w-[350px] select-none"
+          className="group flex items-center justify-between bg-[#1B4332]/95 backdrop-blur-xl hover:bg-[#153427] text-white p-2 sm:px-3.5 sm:py-2.5 rounded-full sm:rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.25)] transition-all duration-300 border border-[#52B788]/70 cursor-pointer sm:w-[350px] select-none"
         >
-          <div className="flex items-center space-x-2.5 overflow-hidden">
+          {/* Mobile view minimized: compact circular form */}
+          <div className="flex sm:hidden items-center justify-center relative">
+            <div className="w-8 h-8 rounded-full bg-[#2D6A4F] flex items-center justify-center text-white border border-[#52B788]/40 shadow-xs">
+              <Bot className="w-4 h-4 text-[#52B788]" />
+            </div>
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#52B788] rounded-full border-2 border-[#1B4332]"></span>
+          </div>
+
+          {/* Desktop view minimized: detailed bar */}
+          <div className="hidden sm:flex items-center space-x-2.5 overflow-hidden">
             <div className="relative shrink-0">
               <div className="w-8 h-8 rounded-xl bg-[#2D6A4F] flex items-center justify-center text-white border border-[#52B788]/40 shadow-xs">
                 <Bot className="w-4 h-4 text-[#52B788]" />
@@ -471,7 +504,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center space-x-1 shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
+          <div className="hidden sm:flex items-center space-x-1 shrink-0 ml-2" onClick={(e) => e.stopPropagation()}>
             <button
               id="ecobot-minimized-expand-btn"
               onClick={() => setIsMinimized(false)}
@@ -606,13 +639,31 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                             : 'bg-[#1B4332] text-white font-medium'
                         }`}
                       >
-                        <p>{msg.text}</p>
+                        {/* Message Text with Link Detection */}
+                        {msg.text.includes('https://calendar.app.google/Joc3dfkudXDNvmSJ8') ? (
+                          <div className="space-y-2">
+                            <p className="whitespace-pre-line">
+                              {msg.text.split('https://calendar.app.google/Joc3dfkudXDNvmSJ8')[0]}
+                              <a
+                                href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-bold underline text-[#2D6A4F] hover:text-[#1B4332] break-all inline"
+                              >
+                                https://calendar.app.google/Joc3dfkudXDNvmSJ8
+                              </a>
+                              {msg.text.split('https://calendar.app.google/Joc3dfkudXDNvmSJ8')[1] || ''}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-line">{msg.text}</p>
+                        )}
 
                         {/* Quick Slot Options if bot proposes inspection times */}
                         {isBot && msg.quickSlots && msg.quickSlots.length > 0 && (
                           <div className="mt-3 pt-2.5 border-t border-[#E2E8F0] space-y-1.5">
                             <span className="text-[10px] font-bold text-[#4A5568] uppercase tracking-wider block">
-                              Select Inspection Window:
+                              Select Option:
                             </span>
                             <div className="flex flex-wrap gap-1.5">
                               {msg.quickSlots.map((slot, sIdx) => (
@@ -638,12 +689,24 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                         {/* Primary Booking Call-To-Action inside Bot Replies */}
                         {isBot && (
                           <div className="mt-3 pt-2.5 border-t border-[#E2E8F0] flex flex-wrap items-center gap-2">
+                            {/* Direct Calendar Link Button */}
+                            <a
+                              href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-xl bg-[#2D6A4F] hover:bg-[#1B4332] text-white text-[11px] font-bold flex items-center space-x-1.5 transition-all shadow-xs hover:scale-102"
+                              title="Open inspection slots on Google Calendar"
+                            >
+                              <CalendarCheck className="w-3.5 h-3.5 text-[#52B788]" />
+                              <span>View Calendar Slots</span>
+                            </a>
+
                             <button
                               onClick={() => launchInspectionSurvey()}
                               className="px-3 py-1.5 rounded-xl bg-[#1B4332] hover:bg-[#132A20] text-white text-[11px] font-bold flex items-center space-x-1.5 transition-all shadow-xs hover:scale-102 cursor-pointer"
                             >
-                              <CalendarCheck className="w-3.5 h-3.5 text-[#52B788]" />
-                              <span>Book On-Site Property Inspection</span>
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#52B788]" />
+                              <span>Book Property Inspection</span>
                             </button>
 
                             <a
@@ -654,7 +717,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                               title="WhatsApp Urgent Dispatch (+27 62 211 8851)"
                             >
                               <Phone className="w-3 h-3 text-white" />
-                              <span>WhatsApp Dispatch</span>
+                              <span>WhatsApp</span>
                             </a>
                           </div>
                         )}
@@ -829,14 +892,26 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                     </p>
                   </div>
 
-                  <button
-                    id="ecobot-maximized-book-btn"
-                    onClick={() => launchInspectionSurvey()}
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#52B788] hover:bg-[#40916C] text-[#1B4332] hover:text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
-                  >
-                    <CalendarCheck className="w-4 h-4" />
-                    <span>Open Booking Form</span>
-                  </button>
+                  <div className="space-y-2">
+                    <a
+                      href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2.5 px-3 rounded-xl bg-[#52B788] hover:bg-[#40916C] text-[#1B4332] hover:text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
+                    >
+                      <CalendarCheck className="w-4 h-4" />
+                      <span>Confirm Booking Slot Picker</span>
+                    </a>
+
+                    <button
+                      id="ecobot-maximized-book-btn"
+                      onClick={() => launchInspectionSurvey()}
+                      className="w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all border border-white/20 flex items-center justify-center space-x-2 cursor-pointer"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-[#52B788]" />
+                      <span>Open Inspection Booking Form</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Emergency Contacts */}

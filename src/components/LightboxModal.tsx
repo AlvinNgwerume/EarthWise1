@@ -74,10 +74,9 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({ item, onClose, onO
           <div className="pt-4 border-t border-[#E2E8F0] space-y-3">
             <button
               onClick={() => {
-                onClose();
                 onOpenBooking();
               }}
-              className="w-full py-3 px-6 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm shadow-md transition-all flex items-center justify-center space-x-2"
+              className="w-full py-3 px-6 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4 text-[#1B4332]" />
               <span>Book Similar Project Assessment</span>

@@ -30,7 +30,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookingModal }
             </div>
 
             <p className="text-[#D8ECE0]/90 text-sm leading-relaxed max-w-md">
-              Cape Town's trusted authority in bio-rational pest exclusion, eco-friendly micro-encapsulated treatments, and humane bird proofing. Safeguarding homes and heritage with eco-friendly solutions.
+              Cape Town’s specialists in safe, eco-conscious pest control and bird proofing. Protecting homes and businesses across the Peninsula.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -151,7 +151,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookingModal }
             <div className="space-y-3 text-sm text-[#D8ECE0]/90">
               <div className="flex items-start space-x-2.5">
                 <MapPin className="w-4 h-4 text-[#52B788] shrink-0 mt-0.5" />
-                <span>Unit 4, Botanical Park, Constantia Main Rd, Cape Town, 7806</span>
+                <span>7 Buzad Road, Pelican Park, Cape Town, 7941</span>
               </div>
               <div className="flex items-center space-x-2.5">
                 <Phone className="w-4 h-4 text-[#52B788] shrink-0" />
@@ -161,8 +161,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookingModal }
               </div>
               <div className="flex items-center space-x-2.5">
                 <Mail className="w-4 h-4 text-[#52B788] shrink-0" />
-                <a href="mailto:info@earthwise-pest.co.za" className="hover:text-white transition-colors font-medium">
-                  info@earthwise-pest.co.za
+                <a href="mailto:hello@earthwisepestmanagement.co.za" className="hover:text-white transition-colors font-medium">
+                  hello@earthwisepestmanagement.co.za
                 </a>
               </div>
             </div>
