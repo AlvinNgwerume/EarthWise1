@@ -14,15 +14,19 @@ import {
   Home, 
   AlertCircle,
   CalendarCheck,
-  ExternalLink
+  ExternalLink,
+  FileSpreadsheet
 } from 'lucide-react';
+import { getAccessToken } from '../services/googleAuth';
+import { appendLeadToGoogleSheet } from '../services/googleSheets';
 
 interface ContactPageProps {
   onNavigate: (page: PageId) => void;
   onOpenBookingModal: () => void;
+  onOpenGoogleSheets?: () => void;
 }
 
-export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBookingModal }) => {
+export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBookingModal, onOpenGoogleSheets }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -64,7 +68,30 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSubmittedRef(data.reference || `EW-${Math.floor(1000 + Math.random() * 9000)}`);
+        const refCode = data.reference || `EW-${Math.floor(1000 + Math.random() * 9000)}`;
+        setSubmittedRef(refCode);
+
+        // Also asynchronously append to connected Google Sheet if authenticated
+        getAccessToken().then(async (token) => {
+          if (token) {
+            try {
+              await appendLeadToGoogleSheet(token, {
+                reference: refCode,
+                fullName: formData.fullName,
+                phone: formData.phone,
+                email: formData.email,
+                suburb: formData.suburb,
+                service: formData.serviceId,
+                propertyType: formData.propertyType,
+                source: 'Contact Form Inquiry',
+                notes: formData.message,
+              });
+            } catch (sheetErr) {
+              console.warn('Google Sheet append error from contact form:', sheetErr);
+            }
+          }
+        });
+
         // Open live calendar in a new tab on confirmed submission while keeping confirmation visible
         try {
           const link = document.createElement('a');

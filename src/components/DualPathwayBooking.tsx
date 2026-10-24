@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CalendarCheck, 
   ExternalLink, 
@@ -10,8 +10,16 @@ import {
   Sparkles, 
   Zap, 
   MapPin, 
-  Lock 
+  Lock,
+  FileSpreadsheet,
+  Send,
+  User as UserIcon,
+  Mail,
+  Home
 } from 'lucide-react';
+import { getAccessToken, subscribeToAuth } from '../services/googleAuth';
+import { appendLeadToGoogleSheet, getStoredSpreadsheetId, getStoredSpreadsheetUrl } from '../services/googleSheets';
+import type { User } from 'firebase/auth';
 
 const LIVE_CALENDAR_URL = 'https://calendar.app.google/Joc3dfkudXDNvmSJ8';
 const WHATSAPP_URL = 'https://wa.me/27622118851?text=Hello%20Earthwise%20Pest%20Management%2C%20I%20would%20like%20a%20free%205-minute%20telephonic%20assessment%20for%20my%20property.';
@@ -25,6 +33,16 @@ const MONTH_NAMES = [
 
 const DAY_NAMES = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
+const CAPE_TOWN_SUBURBS = [
+  'City Bowl & CBD',
+  'Atlantic Seaboard (Camps Bay, Clifton, Sea Point)',
+  'Southern Suburbs (Constantia, Claremont, Rondebosch)',
+  'Northern Suburbs (Durbanville, Bellville, Century City)',
+  'South Peninsula (Hout Bay, Simon\'s Town, Noordhoek)',
+  'West Coast & Blouberg (Table View, Milnerton, Big Bay)',
+  'Winelands & Helderberg (Stellenbosch, Somerset West, Paarl)',
+];
+
 interface DualPathwayBookingProps {
   isModal?: boolean;
   onCloseModal?: () => void;
@@ -36,24 +54,60 @@ interface DualPathwayBookingProps {
     suburb?: string;
     notes?: string;
   };
+  onOpenGoogleSheets?: () => void;
 }
 
 export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
   isModal = false,
   onCloseModal,
   preselectedServiceId,
-  initialData
+  initialData,
+  onOpenGoogleSheets,
 }) => {
   const [activeTab, setActiveTab] = useState<'onsite' | 'phone'>('onsite');
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [redirecting, setRedirecting] = useState<string | null>(null);
 
+  // Google Workspace connection state
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
+  const [hasStoredSheet, setHasStoredSheet] = useState<boolean>(() => Boolean(getStoredSpreadsheetId()));
+
+  // Calendar slot selection & lead capture form state
+  const today = new Date();
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // First day of month (0 = Sun, 1 = Mon ... 6 = Sat)
+  const [selectedDateStr, setSelectedDateStr] = useState<string>(
+    `${today.getDate()} ${MONTH_NAMES[today.getMonth()]} ${today.getFullYear()}`
+  );
+
+  const [leadForm, setLeadForm] = useState({
+    fullName: initialData?.fullName || '',
+    phone: initialData?.phone || '',
+    email: initialData?.email || '',
+    suburb: initialData?.suburb || 'City Bowl & CBD',
+    service: preselectedServiceId || 'eco-treatments',
+    preferredTime: 'Morning Slot (08:00 - 12:00)',
+    propertyType: 'Residential',
+    notes: initialData?.notes || '',
+  });
+
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [submittedLeadRef, setSubmittedLeadRef] = useState<string | null>(null);
+  const [sheetSyncStatus, setSheetSyncStatus] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsub = subscribeToAuth((user, token) => {
+      setCurrentUser(user);
+      setGoogleToken(token);
+      setHasStoredSheet(Boolean(getStoredSpreadsheetId()));
+    });
+    return () => unsub();
+  }, []);
+
   const firstDayOfMonth = new Date(year, month, 1).getDay();
-  // Monday as 0, Sunday as 6
   const startingDayIndex = (firstDayOfMonth + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -65,7 +119,12 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  const redirectToCalendar = (slotLabel?: string) => {
+  const handleSelectDay = (dayNum: number) => {
+    const dateStr = `${dayNum} ${MONTH_NAMES[month]} ${year}`;
+    setSelectedDateStr(dateStr);
+  };
+
+  const openGoogleCalendarDirect = (slotLabel?: string) => {
     setRedirecting(slotLabel || 'Live Calendar');
     try {
       const link = document.createElement('a');
@@ -86,18 +145,118 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
     }, 2000);
   };
 
-  const today = new Date();
+  const handleCaptureLeadAndSchedule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+
+    if (!leadForm.fullName.trim()) {
+      setValidationError('Please enter your full name.');
+      return;
+    }
+    if (!leadForm.phone.trim() && !leadForm.email.trim()) {
+      setValidationError('Please provide at least a phone number or email address for dispatch.');
+      return;
+    }
+
+    setIsSubmittingLead(true);
+    const refCode = `EW-${Math.floor(10000 + Math.random() * 90000)}`;
+
+    const leadRecord = {
+      reference: refCode,
+      fullName: leadForm.fullName.trim(),
+      phone: leadForm.phone.trim(),
+      email: leadForm.email.trim(),
+      suburb: leadForm.suburb,
+      service: leadForm.service,
+      preferredDate: selectedDateStr,
+      preferredTime: leadForm.preferredTime,
+      propertyType: leadForm.propertyType,
+      source: 'Calendar Booking Form',
+      notes: leadForm.notes,
+    };
+
+    let syncedToGoogleSheet = false;
+
+    // 1. Google Sheets Live Capture
+    try {
+      const token = googleToken || (await getAccessToken());
+      if (token) {
+        await appendLeadToGoogleSheet(token, leadRecord);
+        syncedToGoogleSheet = true;
+        setSheetSyncStatus('Logged directly to Google Sheets!');
+      } else {
+        // Queue in localStorage for pending sync when owner logs in
+        try {
+          const existingQueue = JSON.parse(localStorage.getItem('earthwise_pending_leads') || '[]');
+          existingQueue.push({ ...leadRecord, queuedAt: new Date().toISOString() });
+          localStorage.setItem('earthwise_pending_leads', JSON.stringify(existingQueue));
+        } catch {
+          // Ignore storage errors
+        }
+      }
+    } catch (sheetErr: any) {
+      console.warn('Google Sheets append error (graceful fallback):', sheetErr);
+    }
+
+    // 2. Server API fallback storage & HubSpot sync
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: leadRecord.fullName,
+          phone: leadRecord.phone || '+27 00 000 0000',
+          email: leadRecord.email || 'calendar-lead@earthwisepestmanagement.co.za',
+          suburb: leadRecord.suburb,
+          serviceId: leadRecord.service,
+          preferredDate: leadRecord.preferredDate,
+          preferredTime: leadRecord.preferredTime,
+          propertyType: leadRecord.propertyType,
+          source: 'Calendar Booking Form',
+          notes: `${leadRecord.notes ? leadRecord.notes + ' | ' : ''}Slot Selected: ${leadRecord.preferredDate} (${leadRecord.preferredTime})${syncedToGoogleSheet ? ' [Google Sheets Logged]' : ''}`,
+        }),
+      });
+    } catch (serverErr) {
+      console.warn('Server lead backup notice:', serverErr);
+    }
+
+    setSubmittedLeadRef(refCode);
+    setIsSubmittingLead(false);
+
+    // 3. Open Live Google Calendar appointment slot picker in new tab
+    openGoogleCalendarDirect(selectedDateStr);
+  };
+
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
   const todayDate = today.getDate();
 
   return (
     <div className={`w-full ${isModal ? 'space-y-3' : 'space-y-5'}`}>
       
-      {/* Component Header */}
+      {/* Component Header with Google Sheets Status Badge */}
       <div className="text-center max-w-2xl mx-auto space-y-1.5">
-        <div className="inline-flex items-center space-x-1.5 bg-[#F4F7F5] border border-[#D8ECE0] text-[#1B4332] px-3 py-0.5 rounded-full text-[11px] font-extrabold tracking-wider uppercase shadow-2xs">
-          <Sparkles className="w-3 h-3 text-[#52B788]" />
-          <span>Booking Form</span>
+        <div className="flex items-center justify-center space-x-2 flex-wrap gap-y-1">
+          <div className="inline-flex items-center space-x-1.5 bg-[#F4F7F5] border border-[#D8ECE0] text-[#1B4332] px-3 py-0.5 rounded-full text-[11px] font-extrabold tracking-wider uppercase shadow-2xs">
+            <Sparkles className="w-3 h-3 text-[#52B788]" />
+            <span>Inspection & Calendar Dispatch</span>
+          </div>
+
+          {/* Google Sheets Live Status Indicator */}
+          {onOpenGoogleSheets && (
+            <button
+              type="button"
+              onClick={onOpenGoogleSheets}
+              className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-all cursor-pointer shadow-2xs ${
+                currentUser && googleToken
+                  ? 'bg-[#EAF4EE] text-[#1B4332] border-[#52B788]/60 hover:bg-[#d8ece0]'
+                  : 'bg-white text-[#4A5568] border-[#CBD5E1] hover:border-[#1B4332] hover:text-[#1B4332]'
+              }`}
+              title="Google Sheets Lead Hub"
+            >
+              <FileSpreadsheet className="w-3 h-3 text-[#52B788]" />
+              <span>{currentUser && googleToken ? 'Google Sheets Live' : 'Connect Google Sheets'}</span>
+            </button>
+          )}
         </div>
 
         {(preselectedServiceId || initialData?.notes) && (
@@ -114,11 +273,11 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
         )}
 
         <p className="text-xs text-[#4A5568] leading-relaxed max-w-lg mx-auto">
-          Need an emergency physical survey or immediate quote? Choose on-site dispatch, or speak to our technical team in 5 minutes.
+          Choose on-site dispatch to log your inspection into our Google Sheets schedule, or speak to our technical team in 5 minutes.
         </p>
       </div>
 
-      {/* Mobile Switcher (Visible on small screens for rapid toggle) */}
+      {/* Mobile Switcher */}
       <div className="flex lg:hidden items-center p-1 bg-[#F4F7F5] rounded-xl border border-[#D8ECE0] max-w-sm mx-auto shadow-2xs">
         <button
           type="button"
@@ -146,11 +305,11 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
         </button>
       </div>
 
-      {/* Split-View Grid: Trim & Reactive for Website and Mobile */}
+      {/* Split-View Grid: Calendar Lead Capture + Phone Assessment */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-stretch">
         
         {/* ================================================================= */}
-        {/* PATH 1: ON-SITE INSPECTION (Primary)                             */}
+        {/* PATH 1: ON-SITE INSPECTION & GOOGLE SHEETS CALENDAR CAPTURE       */}
         {/* ================================================================= */}
         <div 
           className={`lg:col-span-7 rounded-2xl sm:rounded-3xl bg-white border-2 border-[#1B4332] shadow-md p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden transition-all duration-200 ${
@@ -167,146 +326,307 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
             
             {/* Header / Pathway Title */}
             <div className="space-y-1 pt-0.5">
-              <div className="inline-flex items-center space-x-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#2D6A4F] bg-[#EAF4EE] px-2 py-0.5 rounded-full border border-[#D8ECE0]">
-                <ShieldCheck className="w-3 h-3 text-[#52B788]" />
-                <span>Commercial & Residential</span>
+              <div className="flex items-center justify-between">
+                <div className="inline-flex items-center space-x-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#2D6A4F] bg-[#EAF4EE] px-2 py-0.5 rounded-full border border-[#D8ECE0]">
+                  <ShieldCheck className="w-3 h-3 text-[#52B788]" />
+                  <span>Commercial & Residential</span>
+                </div>
+                <span className="text-[10px] text-[#52B788] font-bold flex items-center space-x-1">
+                  <FileSpreadsheet className="w-3 h-3" />
+                  <span>Google Sheets Sync</span>
+                </span>
               </div>
               <h3 className="text-lg sm:text-xl font-serif-italic font-bold text-[#1B4332]">
-                On-Site Inspection
+                Calendar Booking & On-Site Inspection
               </h3>
               <p className="text-xs text-[#4A5568] leading-relaxed">
-                Guaranteed technician dispatch to conduct a thorough structural survey, identify ingress points, and provide a fixed quote.
+                Select your preferred inspection date, confirm property details, and sync directly to our technicians' Google Sheet schedule.
               </p>
             </div>
 
-            {/* Core Value Props Checklist */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 border-t border-[#E2E8F0]">
-              {[
-                { title: 'Guaranteed Dispatch', desc: 'Same-day emergency or 24-48h routine slot' },
-                { title: 'Structural & Ingress Survey', desc: 'Roof cavities, sub-floor & perimeter audit' },
-                { title: 'Act 36 Pet & Child Safe', desc: 'Zero toxic airborne fumes or evacuation' },
-                { title: 'Exact Fixed Quotation', desc: 'Transparent itemized pricing with 0 hidden fees' },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-start space-x-1.5 text-[11px] text-[#4A5568]">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#52B788] shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-[#1B4332] block font-semibold leading-tight">{item.title}</strong>
-                    <span className="text-[10px] text-[#718096] leading-tight">{item.desc}</span>
+            {/* Submission Success Confirmation Banner */}
+            {submittedLeadRef ? (
+              <div className="bg-[#EAF4EE] border border-[#52B788]/60 rounded-2xl p-4 text-center space-y-2 animate-in fade-in">
+                <div className="w-10 h-10 rounded-full bg-[#1B4332] text-white mx-auto flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-[#52B788]" />
+                </div>
+                <h4 className="font-bold text-sm text-[#1B4332]">Lead Recorded & Slot Reserved!</h4>
+                <p className="text-xs text-[#2D6A4F]">
+                  Reference Code: <strong className="font-mono">{submittedLeadRef}</strong>
+                </p>
+                <p className="text-[11px] text-[#4A5568]">
+                  Target Date: <strong>{selectedDateStr}</strong> ({leadForm.preferredTime})
+                </p>
+                <div className="pt-2 flex justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openGoogleCalendarDirect(selectedDateStr)}
+                    className="px-4 py-2 rounded-xl bg-[#1B4332] text-white text-xs font-bold flex items-center space-x-1.5 shadow-2xs hover:bg-[#132A20]"
+                  >
+                    <CalendarCheck className="w-3.5 h-3.5 text-[#52B788]" />
+                    <span>Re-open Google Calendar</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSubmittedLeadRef(null)}
+                    className="px-3 py-2 rounded-xl border border-[#CBD5E1] bg-white text-[#1B4332] text-xs font-semibold hover:bg-gray-50"
+                  >
+                    Book Another Slot
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Clickable Calendar Module */}
+                <div className="bg-[#F4F7F5] rounded-xl p-3 border border-[#D8ECE0] space-y-2 shadow-2xs">
+                  
+                  {/* Calendar Month Header */}
+                  <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="text-xs sm:text-sm font-bold text-[#1B4332]">
+                        {MONTH_NAMES[month]} {year}
+                      </span>
+                      <span className="text-[9px] bg-[#1B4332] text-white px-1.5 py-0.2 rounded-full font-mono font-bold">
+                        LIVE
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        type="button"
+                        onClick={handlePrevMonth}
+                        className="p-1 rounded bg-white hover:bg-[#E2E8F0] text-[#1B4332] transition-colors border border-[#D8ECE0] cursor-pointer"
+                        aria-label="Previous month"
+                      >
+                        <ChevronLeft className="w-3 h-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNextMonth}
+                        className="p-1 rounded bg-white hover:bg-[#E2E8F0] text-[#1B4332] transition-colors border border-[#D8ECE0] cursor-pointer"
+                        aria-label="Next month"
+                      >
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Days Header */}
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {DAY_NAMES.map((day) => (
+                      <span key={day} className="text-[10px] font-bold text-[#4A5568]/80 py-0.5">
+                        {day}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Calendar Grid */}
+                  <div className="grid grid-cols-7 gap-1">
+                    {Array.from({ length: startingDayIndex }).map((_, i) => (
+                      <div key={`empty-${i}`} className="h-6 sm:h-7" />
+                    ))}
+
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                      const dayNum = i + 1;
+                      const dateString = `${dayNum} ${MONTH_NAMES[month]} ${year}`;
+                      const isSelected = selectedDateStr === dateString;
+                      const isToday = isCurrentMonth && dayNum === todayDate;
+                      const dayOfWeek = (startingDayIndex + i) % 7;
+                      const isSunday = dayOfWeek === 6;
+                      const isPast = isCurrentMonth && dayNum < todayDate;
+
+                      return (
+                        <button
+                          key={`day-${dayNum}`}
+                          type="button"
+                          onClick={() => handleSelectDay(dayNum)}
+                          disabled={isPast}
+                          className={`h-6 sm:h-7 rounded-md text-[11px] font-semibold flex flex-col items-center justify-center relative transition-all duration-150 cursor-pointer ${
+                            isPast 
+                              ? 'text-gray-300 cursor-not-allowed bg-transparent'
+                              : isSelected
+                              ? 'bg-[#1B4332] text-white shadow-xs font-bold ring-2 ring-[#52B788]'
+                              : isToday
+                              ? 'bg-[#EAF4EE] text-[#1B4332] font-bold border border-[#52B788]'
+                              : isSunday
+                              ? 'text-[#718096] bg-white/70 hover:bg-[#1B4332] hover:text-white border border-[#E2E8F0]'
+                              : 'bg-white hover:bg-[#1B4332] hover:text-white text-[#1B4332] border border-[#CBD5E1]/60 shadow-2xs hover:shadow-xs'
+                          }`}
+                          title={`Select ${dayNum} ${MONTH_NAMES[month]}`}
+                        >
+                          <span className="leading-none">{dayNum}</span>
+                          {!isPast && (
+                            <span className={`w-1 h-1 rounded-full mt-0.5 ${isSelected ? 'bg-[#52B788]' : isToday ? 'bg-[#1B4332]' : 'bg-[#2D6A4F]/60'}`} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="text-[11px] text-[#1B4332] font-semibold pt-1 flex items-center justify-between border-t border-[#D8ECE0]">
+                    <span>Selected Date: <strong>{selectedDateStr}</strong></span>
+                    <span className="text-[10px] text-[#718096]">Click any date to pick</span>
                   </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Interactive Clickable Calendar Module (Trimmed & Responsive) */}
-            <div className="bg-[#F4F7F5] rounded-xl p-3 border border-[#D8ECE0] space-y-2 shadow-2xs">
-              
-              {/* Calendar Month Header */}
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center space-x-1.5">
-                  <span className="text-xs sm:text-sm font-bold text-[#1B4332]">
-                    {MONTH_NAMES[month]} {year}
-                  </span>
-                  <span className="text-[9px] bg-[#1B4332] text-white px-1.5 py-0.2 rounded-full font-mono font-bold">
-                    LIVE
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <button
-                    type="button"
-                    onClick={handlePrevMonth}
-                    className="p-1 rounded bg-white hover:bg-[#E2E8F0] text-[#1B4332] transition-colors border border-[#D8ECE0] cursor-pointer"
-                    aria-label="Previous month"
-                  >
-                    <ChevronLeft className="w-3 h-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNextMonth}
-                    className="p-1 rounded bg-white hover:bg-[#E2E8F0] text-[#1B4332] transition-colors border border-[#D8ECE0] cursor-pointer"
-                    aria-label="Next month"
-                  >
-                    <ChevronRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
+                {/* Integrated Lead Capture Form into Google Sheets */}
+                <form onSubmit={handleCaptureLeadAndSchedule} className="space-y-3 pt-1">
+                  
+                  {validationError && (
+                    <div className="p-2.5 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs">
+                      {validationError}
+                    </div>
+                  )}
 
-              {/* Days Header */}
-              <div className="grid grid-cols-7 gap-1 text-center">
-                {DAY_NAMES.map((day) => (
-                  <span key={day} className="text-[10px] font-bold text-[#4A5568]/80 py-0.5">
-                    {day}
-                  </span>
-                ))}
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#1B4332] block mb-1">
+                        Full Name *
+                      </label>
+                      <div className="relative">
+                        <UserIcon className="w-3.5 h-3.5 text-[#52B788] absolute left-2.5 top-2.5" />
+                        <input
+                          type="text"
+                          required
+                          value={leadForm.fullName}
+                          onChange={(e) => setLeadForm({ ...leadForm, fullName: e.target.value })}
+                          placeholder="e.g. David van der Merwe"
+                          className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#CBD5E1] bg-white focus:outline-none focus:ring-1 focus:ring-[#1B4332] text-xs text-[#1B4332]"
+                        />
+                      </div>
+                    </div>
 
-              {/* Calendar Grid (Compact & Trimmed) */}
-              <div className="grid grid-cols-7 gap-1">
-                {Array.from({ length: startingDayIndex }).map((_, i) => (
-                  <div key={`empty-${i}`} className="h-6 sm:h-7" />
-                ))}
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#1B4332] block mb-1">
+                        Phone Number *
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-3.5 h-3.5 text-[#52B788] absolute left-2.5 top-2.5" />
+                        <input
+                          type="tel"
+                          required
+                          value={leadForm.phone}
+                          onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                          placeholder="e.g. 082 123 4567"
+                          className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#CBD5E1] bg-white focus:outline-none focus:ring-1 focus:ring-[#1B4332] text-xs text-[#1B4332]"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                {Array.from({ length: daysInMonth }).map((_, i) => {
-                  const dayNum = i + 1;
-                  const isToday = isCurrentMonth && dayNum === todayDate;
-                  const dayOfWeek = (startingDayIndex + i) % 7;
-                  const isSunday = dayOfWeek === 6;
-                  const isPast = isCurrentMonth && dayNum < todayDate;
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#1B4332] block mb-1">
+                        Email Address
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-3.5 h-3.5 text-[#52B788] absolute left-2.5 top-2.5" />
+                        <input
+                          type="email"
+                          value={leadForm.email}
+                          onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })}
+                          placeholder="client@example.co.za"
+                          className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#CBD5E1] bg-white focus:outline-none focus:ring-1 focus:ring-[#1B4332] text-xs text-[#1B4332]"
+                        />
+                      </div>
+                    </div>
 
-                  return (
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#1B4332] block mb-1">
+                        Cape Town Suburb
+                      </label>
+                      <div className="relative">
+                        <MapPin className="w-3.5 h-3.5 text-[#52B788] absolute left-2.5 top-2.5" />
+                        <select
+                          value={leadForm.suburb}
+                          onChange={(e) => setLeadForm({ ...leadForm, suburb: e.target.value })}
+                          className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#CBD5E1] bg-white focus:outline-none focus:ring-1 focus:ring-[#1B4332] text-xs text-[#1B4332] appearance-none"
+                        >
+                          {CAPE_TOWN_SUBURBS.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#1B4332] block mb-1">
+                        Preferred Arrival Window
+                      </label>
+                      <select
+                        value={leadForm.preferredTime}
+                        onChange={(e) => setLeadForm({ ...leadForm, preferredTime: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl border border-[#CBD5E1] bg-white focus:outline-none focus:ring-1 focus:ring-[#1B4332] text-xs text-[#1B4332]"
+                      >
+                        <option value="Morning Slot (08:00 - 12:00)">Morning Slot (08:00 - 12:00)</option>
+                        <option value="Afternoon Slot (12:00 - 16:00)">Afternoon Slot (12:00 - 16:00)</option>
+                        <option value="Late Afternoon (16:00 - 18:00)">Late Afternoon (16:00 - 18:00)</option>
+                        <option value="Emergency Same-Day First Available">Emergency Same-Day First Available</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#1B4332] block mb-1">
+                        Property Footprint
+                      </label>
+                      <div className="relative">
+                        <Home className="w-3.5 h-3.5 text-[#52B788] absolute left-2.5 top-2.5" />
+                        <select
+                          value={leadForm.propertyType}
+                          onChange={(e) => setLeadForm({ ...leadForm, propertyType: e.target.value })}
+                          className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#CBD5E1] bg-white focus:outline-none focus:ring-1 focus:ring-[#1B4332] text-xs text-[#1B4332] appearance-none"
+                        >
+                          <option value="Residential House / Townhouse">Residential House / Townhouse</option>
+                          <option value="Apartment / Flat">Apartment / Flat</option>
+                          <option value="Commercial / Office / Retail">Commercial / Office / Retail</option>
+                          <option value="Restaurant / Food Hospitality">Restaurant / Food Hospitality</option>
+                          <option value="Industrial / Warehouse">Industrial / Warehouse</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-2 space-y-2">
                     <button
-                      key={`day-${dayNum}`}
-                      type="button"
-                      onClick={() => redirectToCalendar(`${dayNum} ${MONTH_NAMES[month]}`)}
-                      disabled={isPast}
-                      className={`h-6 sm:h-7 rounded-md text-[11px] font-semibold flex flex-col items-center justify-center relative transition-all duration-150 cursor-pointer ${
-                        isPast 
-                          ? 'text-gray-300 cursor-not-allowed bg-transparent'
-                          : isToday
-                          ? 'bg-[#1B4332] text-white shadow-2xs font-bold ring-1.5 ring-[#52B788]'
-                          : isSunday
-                          ? 'text-[#718096] bg-white/70 hover:bg-[#1B4332] hover:text-white border border-[#E2E8F0]'
-                          : 'bg-white hover:bg-[#1B4332] hover:text-white text-[#1B4332] border border-[#CBD5E1]/60 shadow-2xs hover:shadow-xs'
-                      }`}
-                      title={`Select ${dayNum} ${MONTH_NAMES[month]} on Live Calendar`}
+                      type="submit"
+                      disabled={isSubmittingLead}
+                      className="w-full py-3 px-4 rounded-xl bg-[#1B4332] hover:bg-[#132A20] text-white font-extrabold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer group disabled:opacity-50"
                     >
-                      <span className="leading-none">{dayNum}</span>
-                      {!isPast && (
-                        <span className={`w-1 h-1 rounded-full mt-0.5 ${isToday ? 'bg-[#52B788]' : 'bg-[#2D6A4F]/60'}`} />
-                      )}
+                      <FileSpreadsheet className="w-4 h-4 text-[#52B788] group-hover:scale-110 transition-transform" />
+                      <span>
+                        {isSubmittingLead
+                          ? 'Logging to Google Sheets...'
+                          : `Capture to Google Sheets & Open Calendar (${selectedDateStr})`}
+                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 text-white/80" />
                     </button>
-                  );
-                })}
-              </div>
 
-            </div>
+                    <div className="flex items-center justify-between text-[10px] text-[#4A5568] px-1">
+                      <button
+                        type="button"
+                        onClick={() => openGoogleCalendarDirect(selectedDateStr)}
+                        className="text-[#2D6A4F] hover:text-[#1B4332] font-semibold underline cursor-pointer"
+                      >
+                        Skip & jump directly to Google Calendar
+                      </button>
+                      <span className="flex items-center space-x-1">
+                        <Lock className="w-3 h-3 text-[#52B788]" />
+                        <span>Instant Confirmation</span>
+                      </span>
+                    </div>
+                  </div>
+
+                </form>
+              </>
+            )}
 
           </div>
 
-          {/* Primary Action CTA */}
-          <div className="pt-3 space-y-1.5">
-            <a
-              href={LIVE_CALENDAR_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3 px-4 rounded-xl bg-[#1B4332] hover:bg-[#132A20] text-white font-extrabold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer group"
-            >
-              <CalendarCheck className="w-4 h-4 text-[#52B788] group-hover:scale-110 transition-transform" />
-              <span>
-                {redirecting ? `Connecting to ${redirecting}...` : 'Confirm Booking Slot Picker'}
-              </span>
-              <ExternalLink className="w-3.5 h-3.5 text-white/80" />
-            </a>
-
-            <div className="flex items-center justify-between text-[10px] text-[#4A5568] px-1">
-              <span className="flex items-center space-x-1">
-                <MapPin className="w-3 h-3 text-[#52B788]" />
-                <span>Greater Cape Town & Winelands</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <Lock className="w-3 h-3 text-[#52B788]" />
-                <span>Instant Confirmation • Mon–Sat</span>
-              </span>
-            </div>
+          <div className="pt-2 border-t border-[#E2E8F0] mt-3 flex items-center justify-between text-[10px] text-[#718096]">
+            <span>Greater Cape Town & Winelands</span>
+            <span>POPIA & Act 36 Compliant</span>
           </div>
 
         </div>

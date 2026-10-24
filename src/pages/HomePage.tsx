@@ -24,9 +24,10 @@ interface HomePageProps {
     serviceId?: string,
     initialData?: { fullName?: string; phone?: string; email?: string; suburb?: string; notes?: string }
   ) => void;
+  onOpenGoogleSheets?: () => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenBookingModal }) => {
+export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenBookingModal, onOpenGoogleSheets }) => {
   return (
     <div className="space-y-20 pb-16">
       
@@ -283,7 +284,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenBookingMod
       {/* Dedicated Scheduling & Inspection Section (Dual-Pathway Split-View) */}
       <section id="scheduling-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/80 rounded-3xl p-4 sm:p-7 border border-[#D8ECE0] shadow-sm">
-          <DualPathwayBooking />
+          <DualPathwayBooking onOpenGoogleSheets={onOpenGoogleSheets} />
         </div>
       </section>
 

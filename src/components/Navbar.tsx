@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { PageId } from '../types';
-import { Leaf, Phone, ShieldCheck, Menu, X, CalendarCheck, Clock, MapPin } from 'lucide-react';
+import { Leaf, Phone, ShieldCheck, Menu, X, CalendarCheck, Clock, MapPin, FileSpreadsheet } from 'lucide-react';
 
 interface NavbarProps {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
   onOpenBookingModal: () => void;
+  onOpenGoogleSheets?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenBookingModal }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenBookingModal, onOpenGoogleSheets }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -116,8 +117,19 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
               })}
             </nav>
 
-            {/* Action Buttons: WhatsApp Symbol + Book Inspection */}
-            <div className="hidden sm:flex items-center space-x-3">
+            {/* Action Buttons: WhatsApp Symbol + Book Inspection + Google Sheets */}
+            <div className="hidden sm:flex items-center space-x-2.5">
+              {onOpenGoogleSheets && (
+                <button
+                  onClick={onOpenGoogleSheets}
+                  className="w-10 h-10 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] transition-all duration-200 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+                  aria-label="Google Sheets Lead Hub"
+                  title="Google Sheets Lead Hub"
+                >
+                  <FileSpreadsheet className="w-5 h-5 text-[#52B788]" />
+                </button>
+              )}
+
               <a 
                 href="https://wa.me/27622118851?text=Hello%20Earthwise%20Pest%20Management%2C%20I%20would%20like%20to%20inquire%20about%20your%20pest%20control%20services."
                 target="_blank"
@@ -231,6 +243,19 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
                 <CalendarCheck className="w-4 h-4 text-[#1B4332]" />
                 <span>Book Inspection</span>
               </button>
+
+              {onOpenGoogleSheets && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenGoogleSheets();
+                  }}
+                  className="w-full py-2.5 rounded-xl border border-[#D8ECE0] bg-[#EAF4EE] text-[#1B4332] text-sm font-bold flex items-center justify-center space-x-2 hover:bg-[#d8ece0] transition-colors"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-[#52B788]" />
+                  <span>Google Sheets Lead Hub</span>
+                </button>
+              )}
 
               <a
                 href="tel:+27622118851"

@@ -3,9 +3,11 @@ import { PageId } from './types';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { InspectionModal } from './components/InspectionModal';
+import { GoogleSheetsModal } from './components/GoogleSheetsModal';
 import { FloatingEcoBot } from './components/FloatingEcoBot';
 import { CookieConsent } from './components/CookieConsent';
 import { MobileStickyCta } from './components/MobileStickyCta';
+import { initAuth } from './services/googleAuth';
 
 import { HomePage } from './pages/HomePage';
 import { ServicesPage } from './pages/ServicesPage';
@@ -28,6 +30,7 @@ const getInitialPage = (): PageId => {
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>(getInitialPage);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isGoogleSheetsModalOpen, setIsGoogleSheetsModalOpen] = useState(false);
   const [preselectedServiceId, setPreselectedServiceId] = useState<string | undefined>(undefined);
   const [bookingInitialData, setBookingInitialData] = useState<{
     fullName?: string;
@@ -37,6 +40,14 @@ export default function App() {
     notes?: string;
   } | undefined>(undefined);
   const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Initialize Firebase Auth listener once on app mount
+  useEffect(() => {
+    const unsub = initAuth();
+    return () => {
+      if (unsub) unsub();
+    };
+  }, []);
 
   // Sync navigation with browser history
   const handleNavigate = (page: PageId) => {
@@ -124,6 +135,7 @@ export default function App() {
         currentPage={currentPage}
         onNavigate={handleNavigate}
         onOpenBookingModal={() => handleOpenBookingModal()}
+        onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
       />
 
       {/* Main Page Render */}
@@ -132,6 +144,7 @@ export default function App() {
           <HomePage
             onNavigate={handleNavigate}
             onOpenBookingModal={handleOpenBookingModal}
+            onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
           />
         )}
 
@@ -153,6 +166,7 @@ export default function App() {
           <ContactPage
             onNavigate={handleNavigate}
             onOpenBookingModal={() => handleOpenBookingModal()}
+            onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
           />
         )}
 
@@ -177,6 +191,13 @@ export default function App() {
         onClose={handleCloseBookingModal}
         preselectedServiceId={preselectedServiceId}
         initialData={bookingInitialData}
+        onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
+      />
+
+      {/* Google Sheets Lead Hub Modal */}
+      <GoogleSheetsModal
+        isOpen={isGoogleSheetsModalOpen}
+        onClose={() => setIsGoogleSheetsModalOpen(false)}
       />
 
       {/* Cookie Consent Banner (POPIA / GDPR compliant, non-intrusive) */}

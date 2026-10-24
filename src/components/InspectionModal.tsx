@@ -13,13 +13,15 @@ interface InspectionModalProps {
     suburb?: string;
     notes?: string;
   };
+  onOpenGoogleSheets?: () => void;
 }
 
 export const InspectionModal: React.FC<InspectionModalProps> = ({
   isOpen,
   onClose,
   preselectedServiceId,
-  initialData
+  initialData,
+  onOpenGoogleSheets
 }) => {
   if (!isOpen) return null;
 
@@ -48,6 +50,7 @@ export const InspectionModal: React.FC<InspectionModalProps> = ({
             onCloseModal={onClose}
             preselectedServiceId={preselectedServiceId}
             initialData={initialData}
+            onOpenGoogleSheets={onOpenGoogleSheets}
           />
         </div>
 
