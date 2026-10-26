@@ -180,7 +180,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
                     className="px-5 py-2 rounded-xl bg-[#2D6A4F] text-white text-xs font-bold hover:bg-[#1B4332] transition-colors inline-flex items-center space-x-1.5 shadow-2xs"
                   >
                     <CalendarCheck className="w-3.5 h-3.5 text-[#52B788]" />
-                    <span>Confirm Booking Slot Picker (Live Calendar)</span>
+                    <span>Calendar Booking</span>
                     <ExternalLink className="w-3 h-3 text-white/80" />
                   </a>
                   <button
@@ -366,13 +366,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onOpenBook
                   ) : (
                     <>
                       <CalendarCheck className="w-4 h-4 text-[#1B4332] group-hover:scale-110 transition-transform" />
-                      <span>Confirm Booking Slot Picker</span>
+                      <span>Calendar Booking</span>
                       <ExternalLink className="w-3.5 h-3.5 text-[#52B788]" />
                     </>
                   )}
                 </button>
                 <p className="text-[11px] text-center text-[#4A5568]">
-                  Logs your proposal assessment request & redirects directly to the live Google Calendar slot picker.
+                  Logs your proposal assessment request & opens Google Calendar.
                 </p>
               </form>
             )}

@@ -92,7 +92,7 @@ export const SuburbChecker: React.FC<SuburbCheckerProps> = ({ onOpenBookingModal
           onClick={() => onOpenBookingModal('cockroaches', { suburb: current.name, notes: `Inquiry for ${current.name} fleet dispatch (Avg response: ${current.dispatchTime})` })}
           className="px-6 py-3 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm transition-all duration-200 shrink-0 flex items-center space-x-2 shadow-md hover:shadow-lg cursor-pointer"
         >
-          <span>Schedule {current.name} Assessment</span>
+          <span>Schedule an assessment.</span>
           <ArrowRight className="w-4 h-4 text-[#1B4332]" />
         </button>
       </div>

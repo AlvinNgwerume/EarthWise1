@@ -117,19 +117,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
               })}
             </nav>
 
-            {/* Action Buttons: WhatsApp Symbol + Book Inspection + Google Sheets */}
-            <div className="hidden sm:flex items-center space-x-2.5">
-              {onOpenGoogleSheets && (
-                <button
-                  onClick={onOpenGoogleSheets}
-                  className="w-10 h-10 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] transition-all duration-200 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 active:scale-95 cursor-pointer"
-                  aria-label="Google Sheets Lead Hub"
-                  title="Google Sheets Lead Hub"
-                >
-                  <FileSpreadsheet className="w-5 h-5 text-[#52B788]" />
-                </button>
-              )}
-
+            {/* Action Buttons: WhatsApp Symbol + Book Inspection */}
+            <div className="hidden sm:flex items-center space-x-3">
               <a 
                 href="https://wa.me/27622118851?text=Hello%20Earthwise%20Pest%20Management%2C%20I%20would%20like%20to%20inquire%20about%20your%20pest%20control%20services."
                 target="_blank"

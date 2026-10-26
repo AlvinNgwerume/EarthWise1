@@ -47,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookingModal }
             {/* Social Media Links */}
             <div className="pt-2 space-y-2">
               <span className="text-xs uppercase tracking-wider text-[#D8ECE0]/80 font-bold block">
-                Connect With Us
+                Connect With Us!
               </span>
               <div className="flex items-center space-x-3">
                 <a

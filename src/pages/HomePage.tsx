@@ -135,14 +135,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenBookingMod
       {/* Core Services Section with Sophisticated Vector Art */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#1B4332] bg-[#F4F7F5] px-3 py-1 rounded-full border border-[#D8ECE0]">
-            Precision Protocols
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-serif-italic font-bold text-[#1B4332]">
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div>
+            <span className="inline-flex items-center text-xs font-bold uppercase tracking-widest text-[#1B4332] bg-[#F4F7F5] px-4 py-1.5 rounded-full border border-[#D8ECE0] shadow-2xs">
+              Precision Protocols
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-serif-italic font-bold text-[#1B4332] tracking-tight leading-snug">
             Targeted Pest Control Services
           </h2>
-          <p className="text-[#4A5568] text-sm sm:text-base">
+          <p className="text-[#4A5568] text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
             Engineered specifically for Cape Town's micro-climates, residential estates, and commercial food hospitality environments.
           </p>
         </div>

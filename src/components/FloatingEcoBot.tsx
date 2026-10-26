@@ -676,7 +676,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                                       handleSendMessage(slot);
                                     }
                                   }}
-                                  className="px-2.5 py-1.5 rounded-lg bg-[#F4F7F5] hover:bg-[#E2EFE7] border border-[#CBD5E1] text-[#1B4332] text-[11px] font-semibold transition-all hover:scale-102 active:scale-98 flex items-center space-x-1 cursor-pointer"
+                                  className="px-2.5 py-1.5 rounded-lg bg-[#F4F7F5] hover:bg-[#E2EFE7] border border-[#CBD5E1] text-[#1B4332] text-[11px] font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center space-x-1 cursor-pointer"
                                 >
                                   <Clock className="w-3 h-3 text-[#52B788]" />
                                   <span>{slot}</span>
@@ -694,7 +694,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                               href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1.5 rounded-xl bg-[#2D6A4F] hover:bg-[#1B4332] text-white text-[11px] font-bold flex items-center space-x-1.5 transition-all shadow-xs hover:scale-102"
+                              className="px-3 py-1.5 rounded-xl bg-[#2D6A4F] hover:bg-[#1B4332] text-white text-[11px] font-bold flex items-center space-x-1.5 transition-all shadow-xs hover:scale-[1.02]"
                               title="Open inspection slots on Google Calendar"
                             >
                               <CalendarCheck className="w-3.5 h-3.5 text-[#52B788]" />
@@ -703,7 +703,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
 
                             <button
                               onClick={() => launchInspectionSurvey()}
-                              className="px-3 py-1.5 rounded-xl bg-[#1B4332] hover:bg-[#132A20] text-white text-[11px] font-bold flex items-center space-x-1.5 transition-all shadow-xs hover:scale-102 cursor-pointer"
+                              className="px-3 py-1.5 rounded-xl bg-[#1B4332] hover:bg-[#132A20] text-white text-[11px] font-bold flex items-center space-x-1.5 transition-all shadow-xs hover:scale-[1.02] cursor-pointer"
                             >
                               <ShieldCheck className="w-3.5 h-3.5 text-[#52B788]" />
                               <span>Book Property Inspection</span>
@@ -900,7 +900,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                       className="w-full py-2.5 px-3 rounded-xl bg-[#52B788] hover:bg-[#40916C] text-[#1B4332] hover:text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
                     >
                       <CalendarCheck className="w-4 h-4" />
-                      <span>Confirm Booking Slot Picker</span>
+                      <span>Calendar Booking</span>
                     </a>
 
                     <button
