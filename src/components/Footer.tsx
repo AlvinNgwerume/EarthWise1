@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageId } from '../types';
-import { Leaf, ShieldCheck, Phone, Mail, MapPin, Award, Instagram, Facebook, Linkedin } from 'lucide-react';
+import { Leaf, ShieldCheck, Phone, Mail, MapPin, Award, Instagram, Facebook } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (page: PageId) => void;
@@ -60,22 +60,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookingModal }
                   <Instagram className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://www.facebook.com"
+                  href="https://www.facebook.com/profile.php?id=100088780069428"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-xl bg-[#132A20] hover:bg-[#2D6A4F] text-[#52B788] hover:text-white border border-[#52B788]/30 flex items-center justify-center transition-all duration-200 shadow-xs hover:scale-105"
                   aria-label="Follow Earthwise Pest Management on Facebook"
                 >
                   <Facebook className="w-4 h-4" />
-                </a>
-                <a
-                  href="https://www.linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-xl bg-[#132A20] hover:bg-[#2D6A4F] text-[#52B788] hover:text-white border border-[#52B788]/30 flex items-center justify-center transition-all duration-200 shadow-xs hover:scale-105"
-                  aria-label="Connect with Earthwise Pest Management on LinkedIn"
-                >
-                  <Linkedin className="w-4 h-4" />
                 </a>
               </div>
             </div>
