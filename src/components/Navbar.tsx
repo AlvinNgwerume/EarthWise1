@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { PageId } from '../types';
-import { Leaf, Phone, ShieldCheck, Menu, X, CalendarCheck, Clock, MapPin, FileSpreadsheet } from 'lucide-react';
+import { Leaf, Phone, ShieldCheck, Menu, X, CalendarCheck, Clock, MapPin } from 'lucide-react';
 
 interface NavbarProps {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
   onOpenBookingModal: () => void;
-  onOpenGoogleSheets?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenBookingModal, onOpenGoogleSheets }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenBookingModal }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -232,19 +231,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
                 <CalendarCheck className="w-4 h-4 text-[#1B4332]" />
                 <span>Book Inspection</span>
               </button>
-
-              {onOpenGoogleSheets && (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenGoogleSheets();
-                  }}
-                  className="w-full py-2.5 rounded-xl border border-[#D8ECE0] bg-[#EAF4EE] text-[#1B4332] text-sm font-bold flex items-center justify-center space-x-2 hover:bg-[#d8ece0] transition-colors"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-[#52B788]" />
-                  <span>Google Sheets Lead Hub</span>
-                </button>
-              )}
 
               <a
                 href="tel:+27622118851"

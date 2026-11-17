@@ -135,7 +135,6 @@ export default function App() {
         currentPage={currentPage}
         onNavigate={handleNavigate}
         onOpenBookingModal={() => handleOpenBookingModal()}
-        onOpenGoogleSheets={() => setIsGoogleSheetsModalOpen(true)}
       />
 
       {/* Main Page Render */}
