@@ -304,7 +304,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-[#1B4332] text-white rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 border border-[#132A20]">
           <div className="space-y-1 text-center sm:text-left">
-            <h3 className="font-bold text-lg font-serif-italic">Have questions regarding safety or warranties?</h3>
+            <h3 className="font-bold text-lg font-serif-italic text-white">Have questions regarding safety or warranties?</h3>
             <p className="text-xs text-[#D8ECE0]">Our Cape Town technical advisory desk is available for immediate consultations.</p>
           </div>
 

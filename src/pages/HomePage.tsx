@@ -292,7 +292,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenBookingMod
 
       {/* Suburb Coverage Checker Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SuburbChecker onOpenBookingModal={() => onOpenBookingModal()} />
+        <SuburbChecker onOpenBookingModal={onOpenBookingModal} />
       </section>
 
     </div>

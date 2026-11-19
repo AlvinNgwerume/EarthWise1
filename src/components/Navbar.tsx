@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
                   <span className="font-extrabold text-xl tracking-tight text-[#1B4332] group-hover:text-[#2D6A4F] transition-colors">
                     EARTHWISE
                   </span>
-                  <span className="text-[9px] uppercase tracking-widest glass-pill text-[#1B4332] px-2.5 py-0.5 rounded-full font-bold shadow-2xs inline-flex items-center">
+                  <span className="text-[9px] uppercase tracking-widest glass-pill text-[#1B4332] px-2.5 py-0.5 rounded-full font-bold shadow-2xs inline-flex items-center whitespace-nowrap shrink-0">
                     Cape Town
                   </span>
                 </div>
@@ -174,6 +174,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate, onOpenB
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] flex items-center justify-center shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer focus:outline-none"
                 aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? <X className="w-[18px] h-[18px]" /> : <Menu className="w-[18px] h-[18px]" />}
               </button>

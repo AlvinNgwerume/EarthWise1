@@ -40,7 +40,7 @@ export const CookieConsent: React.FC<CookieConsentProps> = ({ onNavigate }) => {
 
   return (
     <div 
-      className="fixed bottom-20 md:bottom-6 left-4 right-4 sm:right-auto sm:left-6 sm:max-w-md z-40 animate-in fade-in slide-in-from-bottom-5 duration-300"
+      className="fixed bottom-36 md:bottom-6 left-4 right-4 sm:right-auto sm:left-6 sm:max-w-md z-40 animate-in fade-in slide-in-from-bottom-5 duration-300"
       role="region"
       aria-label="Cookie consent banner"
     >

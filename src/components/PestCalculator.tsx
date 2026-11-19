@@ -3,7 +3,10 @@ import { Shield, Sparkles, ArrowRight, CheckCircle2, AlertTriangle } from 'lucid
 import { SERVICES_DATA } from '../data/earthwiseData';
 
 interface PestCalculatorProps {
-  onSelectServiceForBooking: (serviceId: string) => void;
+  onSelectServiceForBooking: (
+    serviceId: string,
+    initialData?: { notes?: string }
+  ) => void;
 }
 
 export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceForBooking }) => {
@@ -71,6 +74,12 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
   };
 
   const currentConfig = pestConfigs[selectedPest] || pestConfigs['cockroaches'];
+  const propertyScaleLabels: Record<'small' | 'medium' | 'large' | 'commercial', string> = {
+    small: 'Apartment / Compact Unit',
+    medium: 'Standard Residential House',
+    large: 'Large Estate / Multi-Wing',
+    commercial: 'Commercial Facility',
+  };
 
   return (
     <div className="bg-[#1B4332]/95 backdrop-blur-xl text-[#F4F7F5] rounded-3xl p-6 sm:p-10 border border-white/15 shadow-2xl relative overflow-hidden">
@@ -195,7 +204,9 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
             </div>
             <div className="text-right">
               <span className="text-[10px] uppercase tracking-wider text-[#D8ECE0]/80 block">Assessment</span>
-              <span className="text-xs font-bold text-[#52B788] glass-pill px-2 py-0.5 rounded-full">On-Site Inspection</span>
+              <span className="text-xs font-bold text-[#74C69D] bg-[#1B4332] border border-[#52B788]/40 px-2.5 py-0.5 rounded-full inline-block mt-0.5">
+                On-Site Inspection
+              </span>
             </div>
           </div>
 
@@ -212,12 +223,16 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
           {/* Safety & Timeframe */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="bg-[#1B4332]/90 p-3.5 rounded-2xl border border-[#2D6A4F] space-y-1">
-              <span className="text-[#D8ECE0]/70 block text-[10px] uppercase">Service Timeframe</span>
-              <span className="font-semibold text-white">{currentConfig.timeframe}</span>
+              <span className="text-[#D8ECE0]/70 block text-[10px] uppercase">Footprint & Timeframe</span>
+              <span className="font-semibold text-white block">{propertyScaleLabels[propertySize]}</span>
+              <span className="text-[11px] text-[#D8ECE0]/80 block">{currentConfig.timeframe}</span>
             </div>
             <div className="bg-[#1B4332]/90 p-3.5 rounded-2xl border border-[#2D6A4F] space-y-1">
-              <span className="text-[#D8ECE0]/70 block text-[10px] uppercase">Safety Guarantee</span>
-              <span className="font-semibold text-[#52B788]">100% Eco-Safe</span>
+              <span className="text-[#D8ECE0]/70 block text-[10px] uppercase">Safety Protocol</span>
+              <span className="font-semibold text-[#52B788] block">
+                {hasPetOrChildren ? 'Pet & Child Priority (Act 36)' : 'Standard Act 36 Eco-Safe'}
+              </span>
+              <span className="text-[11px] text-[#D8ECE0]/80 block">Odourless botanical compliance</span>
             </div>
           </div>
 
@@ -229,7 +244,11 @@ export const PestCalculator: React.FC<PestCalculatorProps> = ({ onSelectServiceF
           {/* Action Button */}
           <div className="pt-2">
             <button
-              onClick={() => onSelectServiceForBooking(currentConfig.serviceId)}
+              onClick={() =>
+                onSelectServiceForBooking(currentConfig.serviceId, {
+                  notes: `Calculator Selection: ${currentConfig.title} • ${propertyScaleLabels[propertySize]} • ${hasPetOrChildren ? 'Pet & Child Priority' : 'Standard Eco-Safe'}`,
+                })
+              }
               className="w-full py-3.5 px-6 rounded-xl border border-[#CBD5E1] bg-white hover:border-[#1B4332] hover:bg-[#F4F7F5] text-[#1B4332] font-bold text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center space-x-2 group cursor-pointer"
             >
               <span>Book Property Inspection</span>

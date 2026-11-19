@@ -3,7 +3,7 @@ import { PageId } from '../types';
 import { Leaf, ShieldCheck, Phone, Mail, MapPin, Award, Instagram, Facebook } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate: (page: PageId) => void;
+  onNavigate: (page: PageId, serviceFilterId?: string) => void;
   onOpenBookingModal: () => void;
 }
 
@@ -77,22 +77,22 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookingModal }
             <h3 className="text-sm font-bold uppercase tracking-wider text-white">Explore</h3>
             <ul className="space-y-2.5 text-sm text-[#D8ECE0]/80">
               <li>
-                <button onClick={() => onNavigate('home')} className="hover:text-[#52B788] transition-colors font-medium">
+                <button onClick={() => onNavigate('home')} className="hover:text-[#52B788] transition-colors font-medium cursor-pointer">
                   Home Overview
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-[#52B788] transition-colors font-medium">
+                <button onClick={() => onNavigate('services', 'all')} className="hover:text-[#52B788] transition-colors font-medium cursor-pointer">
                   Pest Control Services
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('about')} className="hover:text-[#52B788] transition-colors font-medium">
+                <button onClick={() => onNavigate('about')} className="hover:text-[#52B788] transition-colors font-medium cursor-pointer">
                   About Earthwise
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('contact')} className="hover:text-[#52B788] transition-colors font-medium">
+                <button onClick={() => onNavigate('contact')} className="hover:text-[#52B788] transition-colors font-medium cursor-pointer">
                   Contact Us
                 </button>
               </li>
@@ -104,32 +104,32 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookingModal }
             <h3 className="text-sm font-bold uppercase tracking-wider text-white">Pest Services</h3>
             <ul className="space-y-2.5 text-sm text-[#D8ECE0]/80">
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-[#52B788] transition-colors text-left font-medium">
+                <button onClick={() => onNavigate('services', 'cockroaches')} className="hover:text-[#52B788] transition-colors text-left font-medium cursor-pointer">
                   Cockroaches
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-[#52B788] transition-colors text-left font-medium">
+                <button onClick={() => onNavigate('services', 'ants')} className="hover:text-[#52B788] transition-colors text-left font-medium cursor-pointer">
                   Ants
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-[#52B788] transition-colors text-left font-medium">
+                <button onClick={() => onNavigate('services', 'rats-mice')} className="hover:text-[#52B788] transition-colors text-left font-medium cursor-pointer">
                   Rats & Mice
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-[#52B788] transition-colors text-left font-medium">
+                <button onClick={() => onNavigate('services', 'mole-treatment')} className="hover:text-[#52B788] transition-colors text-left font-medium cursor-pointer">
                   Mole Treatment
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-[#52B788] transition-colors text-left font-medium">
+                <button onClick={() => onNavigate('services', 'bedbugs-fleas')} className="hover:text-[#52B788] transition-colors text-left font-medium cursor-pointer">
                   Bedbugs & Fleas
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('services')} className="hover:text-[#52B788] transition-colors text-left font-medium">
+                <button onClick={() => onNavigate('services', 'bird-proofing')} className="hover:text-[#52B788] transition-colors text-left font-medium cursor-pointer">
                   Bird Proofing & Bat Removal
                 </button>
               </li>

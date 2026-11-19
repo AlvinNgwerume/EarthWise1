@@ -20,6 +20,7 @@ import {
   Minimize2
 } from 'lucide-react';
 import { PageId } from '../types';
+import { extractTriageUpdates, mapPestToServiceId } from '../utils/triageLogic';
 
 interface Message {
   id: string;
@@ -115,82 +116,6 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
     }
   }, [messages, isOpen, isTyping]);
 
-  // Extracts triage information from customer inputs
-  const extractTriageData = (input: string, prev: TriageState): Partial<TriageState> => {
-    const text = input.toLowerCase();
-    const updates: Partial<TriageState> = {};
-
-    // 1. Detect Pest Issue
-    if (!prev.pest) {
-      if (text.includes('rat') || text.includes('rodent') || text.includes('mice') || text.includes('mouse') || text.includes('dropping')) {
-        updates.pest = 'Rats & Rodents';
-      } else if (text.includes('cockroach') || text.includes('roach')) {
-        updates.pest = 'Cockroaches';
-      } else if (text.includes('termite') || text.includes('wood')) {
-        updates.pest = 'Termites';
-      } else if (text.includes('ant')) {
-        updates.pest = 'Ants';
-      } else if (text.includes('bedbug') || text.includes('bed bug') || text.includes('flea') || text.includes('bite')) {
-        updates.pest = 'Bed Bugs & Fleas';
-      } else if (text.includes('bird') || text.includes('pigeon') || text.includes('seagull')) {
-        updates.pest = 'Bird Proofing';
-      } else if (text.includes('bat')) {
-        updates.pest = 'Bat Removal';
-      } else if (text.includes('mole')) {
-        updates.pest = 'Mole Treatment';
-      } else if (text.includes('wasp') || text.includes('bee') || text.includes('hornet')) {
-        updates.pest = 'Wasps & Bees';
-      }
-    }
-
-    // 2. Detect Property Type & Suburb
-    if (!prev.propertyType) {
-      if (text.includes('house') || text.includes('home') || text.includes('residential') || text.includes('flat') || text.includes('apartment') || text.includes('cottage')) {
-        updates.propertyType = 'Residential';
-      } else if (text.includes('commercial') || text.includes('office') || text.includes('restaurant') || text.includes('hotel') || text.includes('warehouse') || text.includes('factory') || text.includes('kitchen') || text.includes('business')) {
-        updates.propertyType = 'Commercial';
-      }
-    }
-
-    if (!prev.suburb) {
-      const primaryCapeTownSuburbs = [
-        'City Bowl', 'Gardens', 'Camps Bay', 'Sea Point', 'Green Point', 'Atlantic Seaboard',
-        'Claremont', 'Rondebosch', 'Newlands', 'Constantia', 'Southern Suburbs', 'Hout Bay',
-        'Durbanville', 'Bellville', 'Northern Suburbs', 'Blouberg', 'Table View',
-        'Somerset West', 'Helderberg', 'Strand', "Gordon's Bay", 'Pinelands', 'Kenilworth', 'Waterfront', 'Bantry Bay', 'Fresnaye', 'Pelican Park'
-      ];
-      for (const s of primaryCapeTownSuburbs) {
-        if (text.includes(s.toLowerCase())) {
-          updates.suburb = s;
-          break;
-        }
-      }
-    }
-
-    // 3. Detect Contact Details (Client Name and Phone/WhatsApp number)
-    const phoneMatch = input.match(/(?:(?:\+27|0)\s*\d{2}\s*\d{3}\s*\d{4}|\d{10})/);
-    if (phoneMatch && !prev.phone) {
-      updates.phone = phoneMatch[0].replace(/\s+/g, '');
-    }
-
-    const emailMatch = input.match(/[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}/);
-    if (emailMatch && !prev.email) {
-      updates.email = emailMatch[0];
-    }
-
-    if (!prev.fullName) {
-      const nameMatch = input.match(/(?:i'm|im|i am|name is|this is)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i);
-      if (nameMatch && nameMatch[1]) {
-        const candidate = nameMatch[1].trim();
-        if (!['seeing', 'calling', 'looking', 'wondering', 'noticing', 'having', 'dealing'].includes(candidate.toLowerCase())) {
-          updates.fullName = candidate;
-        }
-      }
-    }
-
-    return updates;
-  };
-
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputValue).trim();
     if (!text) return;
@@ -206,8 +131,8 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
     if (!textToSend) setInputValue('');
     setIsTyping(true);
 
-    // Compute updated triage state
-    const triageUpdates = extractTriageData(text, triage);
+    // Compute updated triage state using shared pure logic
+    const triageUpdates = extractTriageUpdates(text, triage);
     const updatedTriage: TriageState = { ...triage, ...triageUpdates };
     
     // Check phase progression based on gathered data (1: Pest -> 2: Property Type -> 3: Suburb -> 4: Contact & Handoff)
@@ -242,7 +167,7 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
         body: JSON.stringify({
           userMessage: text,
           history: historyPayload,
-          triageData: updatedTriage
+          triageData: triage
         })
       });
 
@@ -351,19 +276,6 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
 
     setMessages(prev => [...prev, botMessage]);
     setIsTyping(false);
-  };
-
-  // Helper: map detected pest name to serviceId
-  const mapPestToServiceId = (pest: string | null): string => {
-    if (!pest) return 'cockroaches';
-    const p = pest.toLowerCase();
-    if (p.includes('rat') || p.includes('rodent') || p.includes('mice') || p.includes('mouse')) return 'rats-mice';
-    if (p.includes('cockroach') || p.includes('roach') || p.includes('termite') || p.includes('silverfish')) return 'cockroaches';
-    if (p.includes('ant')) return 'ants';
-    if (p.includes('bird') || p.includes('pigeon') || p.includes('seagull')) return 'bird-proofing';
-    if (p.includes('bedbug') || p.includes('bed bug') || p.includes('flea') || p.includes('mite')) return 'bedbugs-fleas';
-    if (p.includes('wasp') || p.includes('bee') || p.includes('hornet')) return 'wasps-bees';
-    return 'cockroaches';
   };
 
   // Syncs captured triage lead with server & HubSpot CRM
@@ -640,22 +552,29 @@ export const FloatingEcoBot: React.FC<FloatingEcoBotProps> = ({
                         }`}
                       >
                         {/* Message Text with Link Detection */}
-                        {msg.text.includes('https://calendar.app.google/Joc3dfkudXDNvmSJ8') ? (
-                          <div className="space-y-2">
-                            <p className="whitespace-pre-line">
-                              {msg.text.split('https://calendar.app.google/Joc3dfkudXDNvmSJ8')[0]}
-                              <a
-                                href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-bold underline text-[#2D6A4F] hover:text-[#1B4332] break-all inline"
-                              >
-                                https://calendar.app.google/Joc3dfkudXDNvmSJ8
-                              </a>
-                              {msg.text.split('https://calendar.app.google/Joc3dfkudXDNvmSJ8')[1] || ''}
-                            </p>
-                          </div>
-                        ) : (
+                        {msg.text.includes('https://calendar.app.google/Joc3dfkudXDNvmSJ8') ? (() => {
+                          const normalizedText = msg.text.replace(
+                            /\[([^\]]+)\]\((https:\/\/calendar\.app\.google\/Joc3dfkudXDNvmSJ8)\)/g,
+                            '$2'
+                          );
+                          const [beforeLink, afterLink = ''] = normalizedText.split('https://calendar.app.google/Joc3dfkudXDNvmSJ8');
+                          return (
+                            <div className="space-y-2">
+                              <p className="whitespace-pre-line">
+                                {beforeLink}
+                                <a
+                                  href="https://calendar.app.google/Joc3dfkudXDNvmSJ8"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-bold underline text-[#2D6A4F] hover:text-[#1B4332] break-all inline"
+                                >
+                                  https://calendar.app.google/Joc3dfkudXDNvmSJ8
+                                </a>
+                                {afterLink}
+                              </p>
+                            </div>
+                          );
+                        })() : (
                           <p className="whitespace-pre-line">{msg.text}</p>
                         )}
 

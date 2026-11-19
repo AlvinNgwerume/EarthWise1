@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageId, GalleryItem } from '../types';
 import { SERVICES_DATA, GALLERY_ITEMS, FAQ_ITEMS } from '../data/earthwiseData';
 import { ServiceVectorArt } from '../components/ServiceVectorArt';
@@ -29,13 +29,20 @@ interface ServicesPageProps {
     serviceId?: string,
     initialData?: { fullName?: string; phone?: string; email?: string; suburb?: string; notes?: string }
   ) => void;
+  initialServiceFilter?: string;
 }
 
-export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate, onOpenBookingModal }) => {
-  const [activeServiceFilter, setActiveServiceFilter] = useState<string>('all');
+export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate, onOpenBookingModal, initialServiceFilter }) => {
+  const [activeServiceFilter, setActiveServiceFilter] = useState<string>(initialServiceFilter || 'all');
   const [selectedGalleryCategory, setSelectedGalleryCategory] = useState<string>('all');
   const [openFaqId, setOpenFaqId] = useState<string>('faq-1');
   const [selectedGalleryItem, setSelectedGalleryItem] = useState<GalleryItem | null>(null);
+
+  useEffect(() => {
+    if (initialServiceFilter) {
+      setActiveServiceFilter(initialServiceFilter);
+    }
+  }, [initialServiceFilter]);
 
   const filteredServices = activeServiceFilter === 'all'
     ? SERVICES_DATA
@@ -341,6 +348,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onNavigate, onOpenBo
               >
                 <button
                   onClick={() => setOpenFaqId(isOpen ? '' : faq.id)}
+                  aria-expanded={isOpen}
                   className="w-full p-5 text-left font-bold text-sm sm:text-base text-[#1B4332] flex items-center justify-between hover:text-[#2D6A4F] transition-colors cursor-pointer"
                 >
                   <span className="pr-4">{faq.question}</span>

@@ -143,7 +143,7 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     location: 'Camps Bay Hotel Facade',
     description: 'Discreet stone-colored HDPE netting installed along 40m hotel courtyard to prevent pigeon nesting without obstructing panoramic ocean views.',
     imageUrl: birdImg,
-    details: ['316 Marine Grade Stainless Cable', 'Max 2 - Years', 'Zero View Distortion']
+    details: ['316 Marine Grade Stainless Cable', '2-Year Structural Warranty', 'Zero View Distortion']
   },
   {
     id: 'gal-2',

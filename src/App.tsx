@@ -40,6 +40,7 @@ export default function App() {
     notes?: string;
   } | undefined>(undefined);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [servicesFilter, setServicesFilter] = useState<string>('all');
 
   // Initialize Firebase Auth listener once on app mount
   useEffect(() => {
@@ -50,7 +51,10 @@ export default function App() {
   }, []);
 
   // Sync navigation with browser history
-  const handleNavigate = (page: PageId) => {
+  const handleNavigate = (page: PageId, serviceFilterId?: string) => {
+    if (page === 'services') {
+      setServicesFilter(serviceFilterId || 'all');
+    }
     setCurrentPage(page);
     try {
       const targetPath = page === 'home' ? '/' : `/${page}`;
@@ -151,6 +155,7 @@ export default function App() {
           <ServicesPage
             onNavigate={handleNavigate}
             onOpenBookingModal={handleOpenBookingModal}
+            initialServiceFilter={servicesFilter}
           />
         )}
 

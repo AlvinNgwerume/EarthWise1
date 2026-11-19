@@ -12,6 +12,7 @@ import {
   Lock,
   Phone
 } from 'lucide-react';
+import { isPastCalendarDate, canNavigateToPrevMonth } from '../utils/bookingCalendar';
 
 const LIVE_CALENDAR_URL = 'https://calendar.app.google/Joc3dfkudXDNvmSJ8';
 const WHATSAPP_URL = 'https://wa.me/27622118851?text=Hello%20Earthwise%20Pest%20Management%2C%20I%20would%20like%20a%20free%205-minute%20telephonic%20assessment%20for%20my%20property.';
@@ -56,7 +57,10 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
   const startingDayIndex = (firstDayOfMonth + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+  const canGoPrev = canNavigateToPrevMonth(year, month, today);
+
   const handlePrevMonth = () => {
+    if (!canGoPrev) return;
     setCurrentDate(new Date(year, month - 1, 1));
   };
 
@@ -107,7 +111,7 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
               <span>
                 {initialData?.notes
                   ? initialData.notes.replace(/^Inquiry (regarding|referencing) (field study|case study): /i, '')
-                  : `Selected Focus: ${preselectedServiceId.replace(/-/g, ' ').toUpperCase()}`}
+                  : `Selected Focus: ${(preselectedServiceId || '').replace(/-/g, ' ').toUpperCase()}`}
               </span>
             </span>
           </div>
@@ -214,7 +218,10 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
                   <button
                     type="button"
                     onClick={handlePrevMonth}
-                    className="p-1 rounded bg-white hover:bg-[#E2E8F0] text-[#1B4332] transition-colors border border-[#D8ECE0] cursor-pointer"
+                    disabled={!canGoPrev}
+                    className={`p-1 rounded bg-white text-[#1B4332] transition-colors border border-[#D8ECE0] ${
+                      canGoPrev ? 'hover:bg-[#E2E8F0] cursor-pointer' : 'opacity-40 cursor-not-allowed'
+                    }`}
                     aria-label="Previous month"
                   >
                     <ChevronLeft className="w-3 h-3" />
@@ -251,7 +258,7 @@ export const DualPathwayBooking: React.FC<DualPathwayBookingProps> = ({
                   const isToday = isCurrentMonth && dayNum === todayDate;
                   const dayOfWeek = (startingDayIndex + i) % 7;
                   const isSunday = dayOfWeek === 6;
-                  const isPast = isCurrentMonth && dayNum < todayDate;
+                  const isPast = isPastCalendarDate(year, month, dayNum, today);
                   const isClosed = isPast || isSunday;
 
                   return (

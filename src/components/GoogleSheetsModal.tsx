@@ -45,6 +45,7 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({ isOpen, on
   const [spreadsheetUrl, setSpreadsheetUrl] = useState<string | null>(getStoredSpreadsheetUrl());
   const [recentRows, setRecentRows] = useState<Array<{ values: string[]; rowIndex: number }>>([]);
   const [loadingRows, setLoadingRows] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'createSheet' | 'testLead' | null>(null);
 
   useEffect(() => {
     const unsubscribe = subscribeToAuth((user, token) => {
@@ -106,11 +107,7 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({ isOpen, on
 
   const handleCreateNewSheet = async () => {
     if (!accessToken) return;
-    const confirmed = window.confirm(
-      'Create a brand new "Earthwise Pest Management — Booking Leads" spreadsheet in your Google Drive with formatted columns?'
-    );
-    if (!confirmed) return;
-
+    setPendingAction(null);
     setIsLoading(true);
     setErrorMessage(null);
     try {
@@ -129,11 +126,7 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({ isOpen, on
 
   const handleSendTestLead = async () => {
     if (!accessToken || !spreadsheetId) return;
-    const confirmed = window.confirm(
-      'Append a test inspection lead row to your connected Google Sheet to verify real-time capture?'
-    );
-    if (!confirmed) return;
-
+    setPendingAction(null);
     setIsLoading(true);
     setErrorMessage(null);
     try {
@@ -184,7 +177,7 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({ isOpen, on
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-xl font-bold font-serif-italic">Google Sheets Lead Capture</h2>
+                <h2 className="text-xl font-bold font-serif-italic text-white">Google Sheets Lead Capture</h2>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#52B788] text-[#1B4332]">
                   Live Integration
                 </span>
@@ -329,7 +322,7 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({ isOpen, on
                 {/* Action buttons */}
                 <div className="flex flex-wrap gap-2 pt-1">
                   <button
-                    onClick={handleSendTestLead}
+                    onClick={() => setPendingAction('testLead')}
                     disabled={isLoading || !spreadsheetId}
                     className="px-3.5 py-2 rounded-xl bg-[#1B4332] hover:bg-[#132A20] text-white text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
                   >
@@ -338,7 +331,7 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({ isOpen, on
                   </button>
 
                   <button
-                    onClick={handleCreateNewSheet}
+                    onClick={() => setPendingAction('createSheet')}
                     disabled={isLoading}
                     className="px-3.5 py-2 rounded-xl border border-[#CBD5E1] bg-white hover:bg-gray-50 text-[#1B4332] text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
                   >
@@ -351,10 +344,35 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({ isOpen, on
                     disabled={isLoading || loadingRows}
                     className="p-2 rounded-xl border border-[#CBD5E1] bg-white hover:bg-gray-50 text-[#4A5568] text-xs transition-all cursor-pointer shadow-2xs"
                     title="Refresh data"
+                    aria-label="Refresh spreadsheet data"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${loadingRows ? 'animate-spin' : ''}`} />
                   </button>
                 </div>
+
+                {pendingAction && (
+                  <div className="p-3 bg-[#F4F7F5] border border-[#1B4332]/30 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <span className="text-[#1B4332] font-medium">
+                      {pendingAction === 'createSheet'
+                        ? 'Create a brand new "Earthwise Pest Management — Booking Leads" spreadsheet in Google Drive?'
+                        : 'Append a test inspection lead row to your connected Google Sheet?'}
+                    </span>
+                    <div className="flex items-center space-x-2 shrink-0">
+                      <button
+                        onClick={() => setPendingAction(null)}
+                        className="px-2.5 py-1 rounded-lg border border-[#CBD5E1] bg-white text-[#4A5568] font-semibold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={pendingAction === 'createSheet' ? handleCreateNewSheet : handleSendTestLead}
+                        className="px-3 py-1 rounded-lg bg-[#1B4332] text-white font-bold cursor-pointer"
+                      >
+                        Confirm
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Recent Leads Preview from Sheet */}

@@ -5,6 +5,8 @@ import nodemailer from "nodemailer";
 import { Client as HubSpotClient } from "@hubspot/api-client";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
+import { escapeHtml } from "./src/utils/validation";
+import { extractTriageUpdates } from "./src/utils/triageLogic";
 
 const app = express();
 const PORT = 3000;
@@ -210,15 +212,15 @@ async function syncToHubSpot(data: ContactSubmissionPayload, refCode: string) {
         await hubspotClient.crm.objects.notes.basicApi.create({
           properties: {
             hs_timestamp: new Date().toISOString(),
-            hs_note_body: `📥 <strong>New Pest Control Enquiry [${refCode}]</strong><br/>
-              <b>Name:</b> ${data.fullName}<br/>
-              <b>Email:</b> ${data.email}<br/>
-              <b>Phone:</b> ${data.phone}<br/>
-              <b>Service:</b> ${data.serviceId || "Eco-Treatments"}<br/>
-              <b>Suburb:</b> ${data.suburb || "Cape Town"}<br/>
-              <b>Property Type:</b> ${data.propertyType || "Residential"}<br/>
-              ${data.preferredDate ? `<b>Preferred Date:</b> ${data.preferredDate} (${data.preferredTime || "Anytime"})<br/>` : ""}
-              <b>Notes/Message:</b> ${fullNotes}`,
+            hs_note_body: `📥 <strong>New Pest Control Enquiry [${escapeHtml(refCode)}]</strong><br/>
+              <b>Name:</b> ${escapeHtml(data.fullName || "")}<br/>
+              <b>Email:</b> ${escapeHtml(data.email || "")}<br/>
+              <b>Phone:</b> ${escapeHtml(data.phone || "")}<br/>
+              <b>Service:</b> ${escapeHtml(data.serviceId || "Eco-Treatments")}<br/>
+              <b>Suburb:</b> ${escapeHtml(data.suburb || "Cape Town")}<br/>
+              <b>Property Type:</b> ${escapeHtml(data.propertyType || "Residential")}<br/>
+              ${data.preferredDate ? `<b>Preferred Date:</b> ${escapeHtml(data.preferredDate)} (${escapeHtml(data.preferredTime || "Anytime")})<br/>` : ""}
+              <b>Notes/Message:</b> ${escapeHtml(fullNotes)}`,
           },
           associations: [
             {
@@ -272,6 +274,18 @@ async function sendNotificationEmail(data: ContactSubmissionPayload, refCode: st
     });
 
     const fullMessage = data.message || data.notes || "N/A";
+    const safeFullName = escapeHtml(data.fullName || "Valued Customer");
+    const safeEmail = escapeHtml(data.email || "");
+    const safePhone = escapeHtml(data.phone || "");
+    const safeService = escapeHtml(data.serviceId || "General Eco-Pest Protocol");
+    const safeSuburb = escapeHtml(data.suburb || "Cape Town");
+    const safePropertyType = escapeHtml(data.propertyType || "Residential");
+    const safePreferredDate = data.preferredDate ? escapeHtml(data.preferredDate) : "";
+    const safePreferredTime = escapeHtml(data.preferredTime || "Morning");
+    const safeMessageHtml = escapeHtml(fullMessage).replace(/\n/g, "<br/>");
+    const cleanReplyTo = (data.email || "").replace(/[\r\n]/g, "").trim();
+    const cleanSubjectName = (data.fullName || "Customer").replace(/[\r\n]/g, " ").trim();
+    const cleanSubjectSuburb = (data.suburb || "Cape Town").replace(/[\r\n]/g, " ").trim();
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -296,7 +310,7 @@ async function sendNotificationEmail(data: ContactSubmissionPayload, refCode: st
       <body>
         <div class="container">
           <div class="header">
-            <span class="badge">Reference: ${refCode}</span>
+            <span class="badge">Reference: ${escapeHtml(refCode)}</span>
             <h1>New Pest Control Enquiry Received</h1>
             <p>Cape Town Professional Pest Control & Ceiling Services</p>
           </div>
@@ -307,39 +321,39 @@ async function sendNotificationEmail(data: ContactSubmissionPayload, refCode: st
             <table class="data-table">
               <tr>
                 <th>Full Name</th>
-                <td><strong>${data.fullName}</strong></td>
+                <td><strong>${safeFullName}</strong></td>
               </tr>
               <tr>
                 <th>Email Address</th>
-                <td><a href="mailto:${data.email}">${data.email}</a></td>
+                <td><a href="mailto:${safeEmail}">${safeEmail}</a></td>
               </tr>
               <tr>
                 <th>Phone Number</th>
-                <td><a href="tel:${data.phone}">${data.phone}</a></td>
+                <td><a href="tel:${safePhone}">${safePhone}</a></td>
               </tr>
               <tr>
                 <th>Requested Service</th>
-                <td>${data.serviceId || "General Eco-Pest Protocol"}</td>
+                <td>${safeService}</td>
               </tr>
               <tr>
                 <th>Suburb / Zone</th>
-                <td>${data.suburb || "Cape Town"}</td>
+                <td>${safeSuburb}</td>
               </tr>
               <tr>
                 <th>Property Type</th>
-                <td>${data.propertyType || "Residential"}</td>
+                <td>${safePropertyType}</td>
               </tr>
-              ${data.preferredDate ? `
+              ${safePreferredDate ? `
               <tr>
                 <th>Preferred Window</th>
-                <td>${data.preferredDate} (${data.preferredTime || "Morning"})</td>
+                <td>${safePreferredDate} (${safePreferredTime})</td>
               </tr>
               ` : ""}
             </table>
 
             <div class="message-box">
               <strong>Property Description / Customer Notes:</strong><br/>
-              ${fullMessage.replace(/\n/g, "<br/>")}
+              ${safeMessageHtml}
             </div>
           </div>
           <div class="footer">
@@ -353,8 +367,8 @@ async function sendNotificationEmail(data: ContactSubmissionPayload, refCode: st
     const mailOptions = {
       from: `"Earthwise Dispatch" <${smtpUser}>`,
       to: notificationRecipient,
-      replyTo: data.email,
-      subject: `🚨 [${refCode}] New Enquiry from ${data.fullName} - ${data.suburb || "Cape Town"}`,
+      replyTo: cleanReplyTo || undefined,
+      subject: `🚨 [${refCode}] New Enquiry from ${cleanSubjectName} - ${cleanSubjectSuburb}`,
       html: htmlContent,
       text: `New Enquiry [Ref: ${refCode}]\n\nName: ${data.fullName}\nEmail: ${data.email}\nPhone: ${data.phone}\nService: ${data.serviceId}\nSuburb: ${data.suburb}\nProperty: ${data.propertyType}\nMessage: ${fullMessage}`,
     };
@@ -363,23 +377,25 @@ async function sendNotificationEmail(data: ContactSubmissionPayload, refCode: st
     console.log(`✅ Email notification sent to ${notificationRecipient} (MessageID: ${info.messageId})`);
 
     // Optional confirmation email to client
-    try {
-      await transporter.sendMail({
-        from: `"Earthwise Pest Control" <${smtpUser}>`,
-        to: data.email,
-        subject: `Your Pest Control Request Confirmation [Ref: ${refCode}]`,
-        html: `
-          <div style="font-family: sans-serif; padding: 20px; max-width: 500px; color: #162019;">
-            <h2 style="color: #1E3A2B;">Thank you for contacting Earthwise Pest Control, ${data.fullName}!</h2>
-            <p>We have logged your request under reference number <strong>${refCode}</strong>.</p>
-            <p>A senior technician from our Cape Town team will review your suburb (${data.suburb || "Cape Town"}) and service protocol and get in touch with you shortly.</p>
-            <br/>
-            <p style="font-size: 12px; color: #666;">Earthwise Pest Control & Ceiling Services Cape Town</p>
-          </div>
-        `,
-      });
-    } catch (clientMailErr) {
-      console.warn("Client acknowledgement email failed, main notification succeeded:", clientMailErr);
+    if (cleanReplyTo) {
+      try {
+        await transporter.sendMail({
+          from: `"Earthwise Pest Control" <${smtpUser}>`,
+          to: cleanReplyTo,
+          subject: `Your Pest Control Request Confirmation [Ref: ${refCode}]`,
+          html: `
+            <div style="font-family: sans-serif; padding: 20px; max-width: 500px; color: #162019;">
+              <h2 style="color: #1E3A2B;">Thank you for contacting Earthwise Pest Control, ${safeFullName}!</h2>
+              <p>We have logged your request under reference number <strong>${escapeHtml(refCode)}</strong>.</p>
+              <p>A senior technician from our Cape Town team will review your suburb (${safeSuburb}) and service protocol and get in touch with you shortly.</p>
+              <br/>
+              <p style="font-size: 12px; color: #666;">Earthwise Pest Control & Ceiling Services Cape Town</p>
+            </div>
+          `,
+        });
+      } catch (clientMailErr) {
+        console.warn("Client acknowledgement email failed, main notification succeeded:", clientMailErr);
+      }
     }
 
     return { sent: true, messageId: info.messageId, recipient: notificationRecipient };
@@ -533,28 +549,33 @@ Once contact details or a booking request are submitted, confirm that an Earthwi
 // Fallback deterministic response generator strictly matching Eco-Bot workflow & handoff rules
 function generateDeterministicDispatchResponse(
   userText: string,
-  history: Array<{ role: 'user' | 'assistant'; content: string }>,
+  _history: Array<{ role: 'user' | 'assistant'; content: string }>,
   currentTriage: {
-    pest?: string;
-    propertyType?: string;
-    suburb?: string;
-    name?: string;
-    phone?: string;
+    pest?: string | null;
+    propertyType?: string | null;
+    suburb?: string | null;
+    name?: string | null;
+    fullName?: string | null;
+    phone?: string | null;
+    email?: string | null;
     phase?: number;
   } = {}
 ) {
   const text = userText.toLowerCase();
+  const prevState = {
+    pest: currentTriage.pest || null,
+    propertyType: currentTriage.propertyType || null,
+    suburb: currentTriage.suburb || null,
+    fullName: currentTriage.fullName || currentTriage.name || null,
+    phone: currentTriage.phone || null,
+    email: currentTriage.email || null,
+  };
+  const updates = extractTriageUpdates(userText, prevState);
+  const nextTriage = { ...prevState, ...updates };
 
   // 1. HANDOFF TRIGGER: Once contact details or a booking request are submitted
-  const phoneMatch = userText.match(/(?:(?:\+27|0)\s*\d{2}\s*\d{3}\s*\d{4}|\d{10})/);
-  const hasNameIndicator = text.includes("my name is") || text.includes("i'm ") || text.includes("im ") || text.includes("this is ");
-  const nameMatch = userText.match(/(?:i'm|im|i am|name is|this is)\s+([A-Za-z]+)/i);
-
-  const detectedName = nameMatch ? nameMatch[1] : (currentTriage.name || "");
-  const detectedPhone = phoneMatch ? phoneMatch[0].replace(/\s+/g, '') : (currentTriage.phone || "");
-
-  if (phoneMatch || (hasNameIndicator && currentTriage.phone)) {
-    const greeting = detectedName ? `Thank you, ${detectedName}! ` : "Thank you! ";
+  if (updates.phone || (updates.fullName && nextTriage.phone)) {
+    const greeting = nextTriage.fullName ? `Thank you, ${nextTriage.fullName}! ` : "Thank you! ";
     return {
       text: `${greeting}An Earthwise field technician will reach out via WhatsApp or call shortly to confirm the property inspection details.`,
       actionType: "book",
@@ -615,16 +636,8 @@ function generateDeterministicDispatchResponse(
   }
 
   // 6. Suburb / Area in Cape Town provided -> Request Contact Details (Datapoint 4)
-  const capeSuburbs = [
-    "city bowl", "gardens", "camps bay", "sea point", "green point", "atlantic seaboard",
-    "rondebosch", "claremont", "newlands", "constantia", "southern suburbs", "hout bay",
-    "durbanville", "bellville", "northern suburbs", "blouberg", "table view",
-    "somerset west", "helderberg", "strand", "gordon's bay", "pinelands", "kenilworth", "pelican park"
-  ];
-  const matchedSuburb = capeSuburbs.find(s => text.includes(s));
-
-  if (matchedSuburb || (currentTriage.suburb && !currentTriage.phone)) {
-    const formattedSuburb = matchedSuburb ? matchedSuburb.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : (currentTriage.suburb || "Cape Town");
+  if (updates.suburb || (nextTriage.suburb && !nextTriage.phone)) {
+    const formattedSuburb = nextTriage.suburb || "Cape Town";
     return {
       text: `We service ${formattedSuburb} daily with Act No. 36 compliant, pet-safe methods. Could you please provide your Client Name and Phone/WhatsApp number so an Earthwise technician can confirm your service assessment?`,
       actionType: "book",
@@ -634,11 +647,8 @@ function generateDeterministicDispatchResponse(
   }
 
   // 7. Property Type provided (Residential or Commercial) -> Request Suburb / Area in Cape Town (Datapoint 3)
-  const isResidential = text.includes("residential") || text.includes("house") || text.includes("home") || text.includes("flat") || text.includes("apartment");
-  const isCommercial = text.includes("commercial") || text.includes("office") || text.includes("business") || text.includes("restaurant") || text.includes("warehouse");
-
-  if (isResidential || isCommercial || (currentTriage.pest && !currentTriage.suburb)) {
-    const pType = isCommercial ? "commercial" : "residential";
+  if (updates.propertyType || (nextTriage.propertyType && !nextTriage.suburb)) {
+    const pType = (nextTriage.propertyType || "Residential").toLowerCase();
     return {
       text: `Understood, we have dedicated ${pType} teams across Cape Town. Which suburb or area in Cape Town is the property located in?`,
       actionType: "book",
@@ -648,8 +658,7 @@ function generateDeterministicDispatchResponse(
   }
 
   // 8. Pest Type provided -> Request Property Type (Datapoint 2)
-  const pestKeywords = ["cockroach", "roach", "rat", "rodent", "mouse", "mice", "ant", "bedbug", "bed bug", "flea", "termite", "wasp", "bee", "bird", "bat", "mole"];
-  if (pestKeywords.some(k => text.includes(k))) {
+  if (updates.pest || (nextTriage.pest && !nextTriage.propertyType)) {
     return {
       text: "Our eco-conscious treatments resolve infestations safely for children and pets compliant with Act No. 36 standards. Is this for a residential or commercial property?",
       actionType: "book",
